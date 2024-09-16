@@ -64,25 +64,25 @@
             color: white;
             text-decoration: none;
         }
-        .form-section {
-            margin-bottom: 20px;
-        }
-        .form-section th {
-            background-color: #007bff;
-            color: white;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h3>Preview Form</h3>
 
-        <!-- Application Details Section (Horizontal Fields) -->
+        <!-- Application Details Section -->
         <table>
             <tr>
+                <th>Title</th>
+                <td><a href="{% url 'application_details_form' form.0 %}">{{ form.1 }}</a></td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{ form.3 }}</td>
+            </tr>
+            <tr>
                 <th>Application Name</th>
-                <td><a href="{% url 'application_details_form' form.0 %}">{{ application_details.2 }}</a></td>
+                <td>{{ application_details.2 }}</td>
             </tr>
             <tr>
                 <th>Ask ID</th>
@@ -94,93 +94,93 @@
             </tr>
         </table>
 
-        <!-- Secure Role, Role Modification, Data Req, Host Req, and Group Req Sections (Vertical Fields) -->
-        <!-- Secure Environment Section (Column with Multiple Rows) -->
-        <div class="form-section">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Secure Environment</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td><a href="{% url 'secure_role_form' form.0 %}">{{ secure_role_details.2 }}</a></td></tr>
-                    <tr><td>{{ secure_role_details.3 }}</td></tr>
-                    <tr><td>{{ secure_role_details.4 }}</td></tr>
-                    <tr><td>{{ secure_role_details.5 }}</td></tr>
-                    <tr><td>{{ secure_role_details.6 }}</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- Secure Role Section (Horizontal Fields) -->
+        <table>
+            <tr>
+                <th>Secure Environment</th>
+                <th>Secure Application</th>
+                <th>Secure Role</th>
+                <th>Secure Role Approvers</th>
+                <th>As Of</th>
+            </tr>
+            <tr>
+                <td><a href="{% url 'secure_role_form' form.0 %}">{{ secure_role_details.2 }}</a></td>
+                <td>{{ secure_role_details.3 }}</td>
+                <td>{{ secure_role_details.4 }}</td>
+                <td>{{ secure_role_details.5 }}</td>
+                <td>{{ secure_role_details.6 }}</td>
+            </tr>
+        </table>
 
-        <!-- Role Modification Section (Column with Multiple Rows) -->
-        <div class="form-section">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Role Modification</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td><a href="{% url 'role_modification_form' form.0 %}">{{ role_modification_log.2 }}</a></td></tr>
-                    <tr><td>{{ role_modification_log.3 }}</td></tr>
-                    <tr><td>{{ role_modification_log.4 }}</td></tr>
-                    <tr><td>{{ role_modification_log.5 }}</td></tr>
-                    <tr><td>{{ role_modification_log.6 }}</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- Role Modification Section (Horizontal Fields) -->
+        <table>
+            <tr>
+                <th>Request Number</th>
+                <th>Change Description</th>
+                <th>Security Administrator</th>
+                <th>Team Director Approval</th>
+                <th>Data Governance Approval</th>
+                <th>App Team Approval</th>
+                <th>DBA Approval</th>
+            </tr>
+            <tr>
+                <td><a href="{% url 'role_modification_form' form.0 %}">{{ role_modification_log.2 }}</a></td>
+                <td>{{ role_modification_log.3 }}</td>
+                <td>{{ role_modification_log.4 }}</td>
+                <td>{{ role_modification_log.5 }}</td>
+                <td>{{ role_modification_log.6 }}</td>
+                <td>{{ role_modification_log.7 }}</td>
+                <td>{{ role_modification_log.8 }}</td>
+            </tr>
+        </table>
 
-        <!-- Data Request Section (Column with Multiple Rows) -->
-        <div class="form-section">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data Request</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td><a href="{% url 'data_req_form' form.0 %}">{{ data_req.2 }}</a></td></tr>
-                    <tr><td>{{ data_req.3 }}</td></tr>
-                    <tr><td>{{ data_req.4 }}</td></tr>
-                    <tr><td>{{ data_req.5 }}</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- Data Request Section (Horizontal Fields) -->
+        <table>
+            <tr>
+                <th>Database Name</th>
+                <th>Environment</th>
+                <th>Access Rights</th>
+                <th>Business Justification</th>
+            </tr>
+            <tr>
+                <td><a href="{% url 'data_req_form' form.0 %}">{{ data_req.2 }}</a></td>
+                <td>{{ data_req.3 }}</td>
+                <td>{{ data_req.4 }}</td>
+                <td>{{ data_req.5 }}</td>
+            </tr>
+        </table>
 
-        <!-- Host Request Section (Column with Multiple Rows) -->
-        <div class="form-section">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Host Request</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td><a href="{% url 'host_req_form' form.0 %}">{{ host_req.2 }}</a></td></tr>
-                    <tr><td>{{ host_req.3 }}</td></tr>
-                    <tr><td>{{ host_req.4 }}</td></tr>
-                    <tr><td>{{ host_req.5 }}</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- Host Request Section (Horizontal Fields) -->
+        <table>
+            <tr>
+                <th>Host</th>
+                <th>Environment</th>
+                <th>Level of Access</th>
+                <th>Business Justification</th>
+            </tr>
+            <tr>
+                <td><a href="{% url 'host_req_form' form.0 %}">{{ host_req.2 }}</a></td>
+                <td>{{ host_req.3 }}</td>
+                <td>{{ host_req.4 }}</td>
+                <td>{{ host_req.5 }}</td>
+            </tr>
+        </table>
 
-        <!-- Group Request Section (Column with Multiple Rows) -->
-        <div class="form-section">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Group Request</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td><a href="{% url 'group_req_form' form.0 %}">{{ group_req.2 }}</a></td></tr>
-                    <tr><td>{{ group_req.3 }}</td></tr>
-                    <tr><td>{{ group_req.4 }}</td></tr>
-                    <tr><td>{{ group_req.5 }}</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- Group Request Section (Horizontal Fields) -->
+        <table>
+            <tr>
+                <th>Group Name</th>
+                <th>Group Type</th>
+                <th>Description</th>
+                <th>Business Justification</th>
+            </tr>
+            <tr>
+                <td><a href="{% url 'group_req_form' form.0 %}">{{ group_req.2 }}</a></td>
+                <td>{{ group_req.3 }}</td>
+                <td>{{ group_req.4 }}</td>
+                <td>{{ group_req.5 }}</td>
+            </tr>
+        </table>
 
         <!-- Buttons -->
         <a class="btn" href="{% url 'dashboard' %}">Dashboard</a>
