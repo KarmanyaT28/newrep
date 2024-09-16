@@ -3,189 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preview Form - OPTUM</title>
+    <title>View Forms - OPTUM</title>
     <style>
         body {
-            font-family: 'Times New Roman', Times, serif;
-            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fc;
             margin: 0;
             padding: 20px;
         }
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background-color: white;
-            padding: 40px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid #d3d3d3;
-        }
-        h3 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 24px;
-            font-weight: bold;
-            text-decoration: underline;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            margin-bottom: 40px;
         }
         th, td {
-            padding: 12px;
-            border: 1px solid #999;
-            text-align: left;
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
         }
         th {
             background-color: #007bff;
             color: white;
-            font-weight: bold;
         }
-        td {
-            background-color: #f9f9f9;
-        }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
+        button {
+            padding: 5px 10px;
             background-color: #28a745;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 3px;
             cursor: pointer;
-            text-decoration: none;
-            margin: 5px;
         }
-        .btn:hover {
+        button:hover {
             background-color: #218838;
         }
-        a {
-            color: white;
-            text-decoration: none;
+        h3 {
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h3>Preview Form</h3>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <h1>Forms</h1>
 
-        <!-- Application Details Section -->
         <table>
-            <tr>
-                <th>Title</th>
-                <td><a href="{% url 'application_details_form' form.0 %}">{{ form.1 }}</a></td>
-            </tr>
-            <tr>
-                <th>Status</th>
-                <td>{{ form.3 }}</td>
-            </tr>
-            <tr>
-                <th>Application Name</th>
-                <td>{{ application_details.2 }}</td>
-            </tr>
-            <tr>
-                <th>Ask ID</th>
-                <td>{{ application_details.3 }}</td>
-            </tr>
-            <tr>
-                <th>Functional Role</th>
-                <td>{{ application_details.4 }}</td>
-            </tr>
-        </table>
+            
+                {% for form in forms %}
+                <thead>
+                    <tr>Form ID : {{ form.0 }}, Form Data: {{ form.1 }}, Created At: {{ form.2 }}, Status: {{ form.3 }}
+                    
+                        
+                        <a href="{% url 'preview_form' form.0 %}">Preview</a><br><br><br>
 
-        <!-- Secure Role Section (Horizontal Fields) -->
-        <table>
-            <tr>
-                <th>Secure Environment</th>
-                <th>Secure Application</th>
-                <th>Secure Role</th>
-                <th>Secure Role Approvers</th>
-                <th>As Of</th>
-            </tr>
-            <tr>
-                <td><a href="{% url 'secure_role_form' form.0 %}">{{ secure_role_details.2 }}</a></td>
-                <td>{{ secure_role_details.3 }}</td>
-                <td>{{ secure_role_details.4 }}</td>
-                <td>{{ secure_role_details.5 }}</td>
-                <td>{{ secure_role_details.6 }}</td>
-            </tr>
-        </table>
+                        {% if form.3 == 'Submitted' %}
+                        <form action="{% url 'update_form_status' form.0 %}" method="post">
+                            {% csrf_token %}
 
-        <!-- Role Modification Section (Horizontal Fields) -->
-        <table>
-            <tr>
-                <th>Request Number</th>
-                <th>Change Description</th>
-                <th>Security Administrator</th>
-                <th>Team Director Approval</th>
-                <th>Data Governance Approval</th>
-                <th>App Team Approval</th>
-                <th>DBA Approval</th>
-            </tr>
-            <tr>
-                <td><a href="{% url 'role_modification_form' form.0 %}">{{ role_modification_log.2 }}</a></td>
-                <td>{{ role_modification_log.3 }}</td>
-                <td>{{ role_modification_log.4 }}</td>
-                <td>{{ role_modification_log.5 }}</td>
-                <td>{{ role_modification_log.6 }}</td>
-                <td>{{ role_modification_log.7 }}</td>
-                <td>{{ role_modification_log.8 }}</td>
-            </tr>
-        </table>
+                            <button type="submit">Move to Pending Approval</button><br>
+                        </form>
+                        
+                        {% endif %}
 
-        <!-- Data Request Section (Horizontal Fields) -->
-        <table>
-            <tr>
-                <th>Database Name</th>
-                <th>Environment</th>
-                <th>Access Rights</th>
-                <th>Business Justification</th>
-            </tr>
-            <tr>
-                <td><a href="{% url 'data_req_form' form.0 %}">{{ data_req.2 }}</a></td>
-                <td>{{ data_req.3 }}</td>
-                <td>{{ data_req.4 }}</td>
-                <td>{{ data_req.5 }}</td>
-            </tr>
-        </table>
+                        {% if form.3 == 'In Progress' %}
+                        <form action="{% url 'submit_form' form.0 %}" method="post">
+                            {% csrf_token %}
 
-        <!-- Host Request Section (Horizontal Fields) -->
-        <table>
-            <tr>
-                <th>Host</th>
-                <th>Environment</th>
-                <th>Level of Access</th>
-                <th>Business Justification</th>
-            </tr>
-            <tr>
-                <td><a href="{% url 'host_req_form' form.0 %}">{{ host_req.2 }}</a></td>
-                <td>{{ host_req.3 }}</td>
-                <td>{{ host_req.4 }}</td>
-                <td>{{ host_req.5 }}</td>
-            </tr>
-        </table>
+                            <button type="submit">Submit</button><br>
+                        </form>
+                        
+                        {% endif %}
 
-        <!-- Group Request Section (Horizontal Fields) -->
-        <table>
-            <tr>
-                <th>Group Name</th>
-                <th>Group Type</th>
-                <th>Description</th>
-                <th>Business Justification</th>
-            </tr>
-            <tr>
-                <td><a href="{% url 'group_req_form' form.0 %}">{{ group_req.2 }}</a></td>
-                <td>{{ group_req.3 }}</td>
-                <td>{{ group_req.4 }}</td>
-                <td>{{ group_req.5 }}</td>
-            </tr>
-        </table>
+                        {% if form.3 == 'Pending Approval' %}
+                        <form action="{% url 'update_form_status_approved' form.0 %}" method="post">
+                            {% csrf_token %}
 
-        <!-- Buttons -->
-        <a class="btn" href="{% url 'dashboard' %}">Dashboard</a>
-        <a class="btn" href="{% url 'download_form' intake_form_id %}">Download Word Document</a>
+                            <button type="submit">Approved</button><br>
+                        </form>
+                        
+                        {% endif %}
+
+                        {% if form.3 == 'Approved' %}
+                        <form action="{% url 'update_form_status_mail' form.0 %}" method="post">
+                            {% csrf_token %}
+
+                            <button type="submit">Completed & MAIL SENT</button><br>
+                        </form>
+                        
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>You have not created any forms</tr>
+                </thead>
+                {% endfor %}
+
+            
+
+                </table>
 
     </div>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+def download_form(request, intake_form_id):
+    # SQL query to fetch form data
+    query = """
+    SELECT * FROM intake_form
+    WHERE id = %s
+    """
+    
+    with connection.cursor() as cursor:
+        cursor.execute(query, [intake_form_id])
+        form_data = cursor.fetchone()
+    
+    if not form_data:
+        return HttpResponse("Form not found.", status=404)
+
+    # Create a Word document
+    doc = Document()
+    doc.add_heading('Intake Form', 0)
+
+    # Assuming the form_data has the required fields in the correct order
+    doc.add_paragraph(f"Form ID: {form_data[0]}")
+    doc.add_paragraph(f"List of Applications: {form_data[1]}")
+    doc.add_paragraph(f"Application ID: {form_data[2]}")
+    # Add other fields similarly
+
+    # Prepare the document for download
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+
+    response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    response['Content-Disposition'] = f'attachment; filename=Intake_Form_{intake_form_id}.docx'
+
+    return response
