@@ -1,123 +1,16 @@
-import io
+from django.template.loader import render_to_string
+from weasyprint import HTML
 from django.http import HttpResponse
-from django.db import connection
-from docx import Document
 
-def download_form(request, intake_form_id):
-    # Query to fetch data from application_details_form
-    query_application_details = """
-    SELECT * FROM application_details_form
-    WHERE intake_form_id = %s
-    """
+def download_preview_as_pdf(request, intake_form_id):
+    # Render preview_form.html with necessary context data
+    html_string = render_to_string('preview_form.html', {'form_id': intake_form_id})
+
+    # Create PDF from HTML string
+    pdf_file = HTML(string=html_string).write_pdf()
+
+    # Prepare the response as a PDF file download
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Form_{intake_form_id}.pdf"'
     
-    # Query to fetch data from secure_role_form
-    query_secure_role = """
-    SELECT * FROM secure_role_form
-    WHERE intake_form_id = %s
-    """
-    
-    # Query to fetch data from role_modification_form
-    query_role_modification = """
-    SELECT * FROM role_modification_form
-    WHERE intake_form_id = %s
-    """
-    
-    # Query to fetch data from data_req_form
-    query_data_req = """
-    SELECT * FROM data_req_form
-    WHERE intake_form_id = %s
-    """
-    
-    # Query to fetch data from host_req_form
-    query_host_req = """
-    SELECT * FROM host_req_form
-    WHERE intake_form_id = %s
-    """
-    
-    # Query to fetch data from group_req_form
-    query_group_req = """
-    SELECT * FROM group_req_form
-    WHERE intake_form_id = %s
-    """
-
-    with connection.cursor() as cursor:
-        # Fetch data from all 6 tables
-        cursor.execute(query_application_details, [intake_form_id])
-        application_details_data = cursor.fetchone()
-
-        cursor.execute(query_secure_role, [intake_form_id])
-        secure_role_data = cursor.fetchone()
-
-        cursor.execute(query_role_modification, [intake_form_id])
-        role_modification_data = cursor.fetchone()
-
-        cursor.execute(query_data_req, [intake_form_id])
-        data_req_data = cursor.fetchone()
-
-        cursor.execute(query_host_req, [intake_form_id])
-        host_req_data = cursor.fetchone()
-
-        cursor.execute(query_group_req, [intake_form_id])
-        group_req_data = cursor.fetchone()
-
-    # Check if any of the forms return None (if they don't exist)
-    if not application_details_data:
-        return HttpResponse("Application details form not found.", status=404)
-
-    # Create a Word document
-    doc = Document()
-    doc.add_heading('Form Data', 0)
-
-    # Adding application details form data to the document
-    doc.add_heading('Application Details Form', level=1)
-    doc.add_paragraph(f"Form ID: {application_details_data[0]}")
-    doc.add_paragraph(f"List of Applications: {application_details_data[1]}")
-    doc.add_paragraph(f"Application ID: {application_details_data[2]}")
-    doc.add_paragraph(f"Application Name: {application_details_data[3]}")
-    doc.add_paragraph(f"Owner: {application_details_data[4]}")
-    doc.add_paragraph(f"Creation Date: {application_details_data[5]}")
-
-    # Adding secure role form data
-    if secure_role_data:
-        doc.add_heading('Secure Role Form', level=1)
-        doc.add_paragraph(f"Role Name: {secure_role_data[1]}")
-        doc.add_paragraph(f"Role Type: {secure_role_data[2]}")
-        doc.add_paragraph(f"Access Level: {secure_role_data[3]}")
-
-    # Adding role modification form data
-    if role_modification_data:
-        doc.add_heading('Role Modification Form', level=1)
-        doc.add_paragraph(f"Role ID: {role_modification_data[1]}")
-        doc.add_paragraph(f"Role Status: {role_modification_data[2]}")
-        doc.add_paragraph(f"Requested By: {role_modification_data[3]}")
-
-    # Adding data request form data
-    if data_req_data:
-        doc.add_heading('Data Request Form', level=1)
-        doc.add_paragraph(f"Data Request ID: {data_req_data[1]}")
-        doc.add_paragraph(f"Data Type: {data_req_data[2]}")
-        doc.add_paragraph(f"Purpose: {data_req_data[3]}")
-
-    # Adding host request form data
-    if host_req_data:
-        doc.add_heading('Host Request Form', level=1)
-        doc.add_paragraph(f"Host Name: {host_req_data[1]}")
-        doc.add_paragraph(f"Environment: {host_req_data[2]}")
-        doc.add_paragraph(f"IP Address: {host_req_data[3]}")
-
-    # Adding group request form data
-    if group_req_data:
-        doc.add_heading('Group Request Form', level=1)
-        doc.add_paragraph(f"Group Name: {group_req_data[1]}")
-        doc.add_paragraph(f"Group Type: {group_req_data[2]}")
-        doc.add_paragraph(f"Group Owner: {group_req_data[3]}")
-
-    # Prepare the document for download
-    buffer = io.BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-
-    response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = f'attachment; filename=Intake_Form_{intake_form_id}.docx'
-
     return response
