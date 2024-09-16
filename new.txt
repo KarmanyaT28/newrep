@@ -1,115 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Forms - OPTUM</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
             margin: 0;
             padding: 20px;
         }
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
             background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #0056b3;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
+
         th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
+
         th {
             background-color: #007bff;
             color: white;
         }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
         button {
-            padding: 5px 10px;
+            padding: 8px 16px;
             background-color: #28a745;
             color: white;
             border: none;
-            border-radius: 3px;
+            border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
+
         button:hover {
             background-color: #218838;
         }
-        h3 {
-            text-align: center;
+
+        .status {
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 12px;
+            color: white;
+        }
+
+        .status.in-progress {
+            background-color: #ffc107;
+        }
+
+        .status.submitted {
+            background-color: #17a2b8;
+        }
+
+        .status.pending {
+            background-color: #fd7e14;
+        }
+
+        .status.approved {
+            background-color: #28a745;
+        }
+
+        .status.completed {
+            background-color: #6c757d;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <a href="{% url 'dashboard' %}">Dashboard</a>
         <h1>Forms</h1>
 
         <table>
-            
+            <thead>
+                <tr>
+                    <th>Form ID</th>
+                    <th>Form Data</th>
+                    <th>Created At</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
                 {% for form in forms %}
-                <thead>
-                    <tr>Form ID : {{ form.0 }}, Form Data: {{ form.1 }}, Created At: {{ form.2 }}, Status: {{ form.3 }}
-                    
-                        
-                        <a href="{% url 'preview_form' form.0 %}">Preview</a><br><br><br>
+                <tr>
+                    <td>{{ form.0 }}</td>
+                    <td>{{ form.1 }}</td>
+                    <td>{{ form.2 }}</td>
+                    <td>
+                        <span class="status {% if form.3 == 'In Progress' %}in-progress{% elif form.3 == 'Submitted' %}submitted{% elif form.3 == 'Pending Approval' %}pending{% elif form.3 == 'Approved' %}approved{% else %}completed{% endif %}">
+                            {{ form.3 }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'preview_form' form.0 %}">Preview</a><br>
 
                         {% if form.3 == 'Submitted' %}
                         <form action="{% url 'update_form_status' form.0 %}" method="post">
                             {% csrf_token %}
-
-                            <button type="submit">Move to Pending Approval</button><br>
+                            <button type="submit">Move to Pending Approval</button>
                         </form>
-                        
                         {% endif %}
 
                         {% if form.3 == 'In Progress' %}
                         <form action="{% url 'submit_form' form.0 %}" method="post">
                             {% csrf_token %}
-
-                            <button type="submit">Submit</button><br>
+                            <button type="submit">Submit</button>
                         </form>
-                        
                         {% endif %}
 
                         {% if form.3 == 'Pending Approval' %}
                         <form action="{% url 'update_form_status_approved' form.0 %}" method="post">
                             {% csrf_token %}
-
-                            <button type="submit">Approved</button><br>
+                            <button type="submit">Approve</button>
                         </form>
-                        
                         {% endif %}
 
                         {% if form.3 == 'Approved' %}
                         <form action="{% url 'update_form_status_mail' form.0 %}" method="post">
                             {% csrf_token %}
-
-                            <button type="submit">Completed & MAIL SENT</button><br>
+                            <button type="submit">Completed & MAIL SENT</button>
                         </form>
-                        
                         {% endif %}
-                    </tr>
-                    {% empty %}
-                    <tr>You have not created any forms</tr>
-                </thead>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">You have not created any forms.</td>
+                </tr>
                 {% endfor %}
-
-            
-
-                </table>
-
+            </tbody>
+        </table>
     </div>
 </body>
+
 </html>
 
 
@@ -122,36 +183,241 @@
 
 
 
-def download_form(request, intake_form_id):
-    # SQL query to fetch form data
-    query = """
-    SELECT * FROM intake_form
-    WHERE id = %s
-    """
-    
-    with connection.cursor() as cursor:
-        cursor.execute(query, [intake_form_id])
-        form_data = cursor.fetchone()
-    
-    if not form_data:
-        return HttpResponse("Form not found.", status=404)
 
-    # Create a Word document
-    doc = Document()
-    doc.add_heading('Intake Form', 0)
 
-    # Assuming the form_data has the required fields in the correct order
-    doc.add_paragraph(f"Form ID: {form_data[0]}")
-    doc.add_paragraph(f"List of Applications: {form_data[1]}")
-    doc.add_paragraph(f"Application ID: {form_data[2]}")
-    # Add other fields similarly
 
-    # Prepare the document for download
-    buffer = io.BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
 
-    response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = f'attachment; filename=Intake_Form_{intake_form_id}.docx'
 
-    return response
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Forms - OPTUM</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        td {
+            background-color: #f8f9fa;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .form-actions form {
+            display: inline-block;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .status-submitted {
+            background-color: #ffc107;
+            color: #212529;
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+
+        .status-progress {
+            background-color: #17a2b8;
+            color: white;
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+
+        .status-approved {
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+
+        .status-pending {
+            background-color: #fd7e14;
+            color: white;
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+
+        .status-mail {
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+
+        .no-forms {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #555;
+            margin-top: 20px;
+        }
+
+        .dashboard-link {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .dashboard-link:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <a class="dashboard-link" href="{% url 'dashboard' %}">Dashboard</a>
+        <h1>Forms</h1>
+
+        {% if forms %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Form ID</th>
+                    <th>Form Data</th>
+                    <th>Created At</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in forms %}
+                <tr>
+                    <td>{{ form.0 }}</td>
+                    <td>{{ form.1 }}</td>
+                    <td>{{ form.2 }}</td>
+                    <td>
+                        {% if form.3 == 'Submitted' %}
+                        <span class="status-submitted">{{ form.3 }}</span>
+                        {% elif form.3 == 'In Progress' %}
+                        <span class="status-progress">{{ form.3 }}</span>
+                        {% elif form.3 == 'Pending Approval' %}
+                        <span class="status-pending">{{ form.3 }}</span>
+                        {% elif form.3 == 'Approved' %}
+                        <span class="status-approved">{{ form.3 }}</span>
+                        {% elif form.3 == 'Mail Sent' %}
+                        <span class="status-mail">{{ form.3 }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="form-actions">
+                        <a href="{% url 'preview_form' form.0 %}">Preview</a>
+
+                        {% if form.3 == 'Submitted' %}
+                        <form action="{% url 'update_form_status' form.0 %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit">Pending Approval</button>
+                        </form>
+                        {% elif form.3 == 'In Progress' %}
+                        <form action="{% url 'submit_form' form.0 %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit">Submit</button>
+                        </form>
+                        {% elif form.3 == 'Pending Approval' %}
+                        <form action="{% url 'update_form_status_approved' form.0 %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit">Approve</button>
+                        </form>
+                        {% elif form.3 == 'Approved' %}
+                        <form action="{% url 'update_form_status_mail' form.0 %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit">Mark as Completed</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="no-forms">You have not created any forms.</p>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>
+
+
