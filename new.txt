@@ -1,423 +1,139 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Forms - OPTUM</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: #007bff;
-            margin-bottom: 20px;
-        }
-
-        a {
-            color: #007bff;
-            text-decoration: none;
-            font-size: 1.1rem;
-            transition: color 0.3s;
-        }
-
-        a:hover {
-            color: #0056b3;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        button {
-            padding: 8px 16px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #218838;
-        }
-
-        .status {
-            font-weight: bold;
-            padding: 6px 12px;
-            border-radius: 12px;
-            color: white;
-        }
-
-        .status.in-progress {
-            background-color: #ffc107;
-        }
-
-        .status.submitted {
-            background-color: #17a2b8;
-        }
-
-        .status.pending {
-            background-color: #fd7e14;
-        }
-
-        .status.approved {
-            background-color: #28a745;
-        }
-
-        .status.completed {
-            background-color: #6c757d;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <a href="{% url 'dashboard' %}">Dashboard</a>
-        <h1>Forms</h1>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Form ID</th>
-                    <th>Form Data</th>
-                    <th>Created At</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for form in forms %}
-                <tr>
-                    <td>{{ form.0 }}</td>
-                    <td>{{ form.1 }}</td>
-                    <td>{{ form.2 }}</td>
-                    <td>
-                        <span class="status {% if form.3 == 'In Progress' %}in-progress{% elif form.3 == 'Submitted' %}submitted{% elif form.3 == 'Pending Approval' %}pending{% elif form.3 == 'Approved' %}approved{% else %}completed{% endif %}">
-                            {{ form.3 }}
-                        </span>
-                    </td>
-                    <td>
-                        <a href="{% url 'preview_form' form.0 %}">Preview</a><br>
-
-                        {% if form.3 == 'Submitted' %}
-                        <form action="{% url 'update_form_status' form.0 %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit">Move to Pending Approval</button>
-                        </form>
-                        {% endif %}
-
-                        {% if form.3 == 'In Progress' %}
-                        <form action="{% url 'submit_form' form.0 %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit">Submit</button>
-                        </form>
-                        {% endif %}
-
-                        {% if form.3 == 'Pending Approval' %}
-                        <form action="{% url 'update_form_status_approved' form.0 %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit">Approve</button>
-                        </form>
-                        {% endif %}
-
-                        {% if form.3 == 'Approved' %}
-                        <form action="{% url 'update_form_status_mail' form.0 %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit">Completed & MAIL SENT</button>
-                        </form>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5">You have not created any forms.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</body>
-
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Forms - OPTUM</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: #007bff;
-            margin-bottom: 30px;
-            font-size: 2rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th,
-        td {
-            padding: 15px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #007bff;
-            color: white;
-            font-weight: bold;
-        }
-
-        td {
-            background-color: #f8f9fa;
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .form-actions form {
-            display: inline-block;
-        }
-
-        button {
-            padding: 10px 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #218838;
-        }
-
-        a {
-            text-decoration: none;
-            color: #007bff;
-            font-weight: bold;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .status-submitted {
-            background-color: #ffc107;
-            color: #212529;
-            border-radius: 5px;
-            padding: 5px 10px;
-        }
-
-        .status-progress {
-            background-color: #17a2b8;
-            color: white;
-            border-radius: 5px;
-            padding: 5px 10px;
-        }
-
-        .status-approved {
-            background-color: #28a745;
-            color: white;
-            border-radius: 5px;
-            padding: 5px 10px;
-        }
-
-        .status-pending {
-            background-color: #fd7e14;
-            color: white;
-            border-radius: 5px;
-            padding: 5px 10px;
-        }
-
-        .status-mail {
-            background-color: #007bff;
-            color: white;
-            border-radius: 5px;
-            padding: 5px 10px;
-        }
-
-        .no-forms {
-            text-align: center;
-            font-size: 1.1rem;
-            color: #555;
-            margin-top: 20px;
-        }
-
-        .dashboard-link {
-            display: inline-block;
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            border-radius: 5px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1rem;
-        }
-
-        .dashboard-link:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="container">
-        <a class="dashboard-link" href="{% url 'dashboard' %}">Dashboard</a>
-        <h1>Forms</h1>
-
-        {% if forms %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Form ID</th>
-                    <th>Form Data</th>
-                    <th>Created At</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for form in forms %}
-                <tr>
-                    <td>{{ form.0 }}</td>
-                    <td>{{ form.1 }}</td>
-                    <td>{{ form.2 }}</td>
-                    <td>
-                        {% if form.3 == 'Submitted' %}
-                        <span class="status-submitted">{{ form.3 }}</span>
-                        {% elif form.3 == 'In Progress' %}
-                        <span class="status-progress">{{ form.3 }}</span>
-                        {% elif form.3 == 'Pending Approval' %}
-                        <span class="status-pending">{{ form.3 }}</span>
-                        {% elif form.3 == 'Approved' %}
-                        <span class="status-approved">{{ form.3 }}</span>
-                        {% elif form.3 == 'Mail Sent' %}
-                        <span class="status-mail">{{ form.3 }}</span>
-                        {% endif %}
-                    </td>
-                    <td class="form-actions">
-                        <a href="{% url 'preview_form' form.0 %}">Preview</a>
-
-                        {% if form.3 == 'Submitted' %}
-                        <form action="{% url 'update_form_status' form.0 %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit">Pending Approval</button>
-                        </form>
-                        {% elif form.3 == 'In Progress' %}
-                        <form action="{% url 'submit_form' form.0 %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit">Submit</button>
-                        </form>
-                        {% elif form.3 == 'Pending Approval' %}
-                        <form action="{% url 'update_form_status_approved' form.0 %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit">Approve</button>
-                        </form>
-                        {% elif form.3 == 'Approved' %}
-                        <form action="{% url 'update_form_status_mail' form.0 %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit">Mark as Completed</button>
-                        </form>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p class="no-forms">You have not created any forms.</p>
-        {% endif %}
-    </div>
-
-</body>
-
-</html>
-
-
+import io
+from docx import Document
+from django.http import HttpResponse
+from django.db import connection
+from docx.shared import Pt
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+
+def download_form(request, intake_form_id):
+    # SQL query to fetch form data
+    query = """
+    SELECT * FROM intake_form
+    WHERE id = %s
+    """
+    
+    with connection.cursor() as cursor:
+        cursor.execute(query, [intake_form_id])
+        form_data = cursor.fetchone()
+    
+    if not form_data:
+        return HttpResponse("Form not found.", status=404)
+
+    # Create a Word document
+    doc = Document()
+
+    # Custom styling: setting title, font, and alignment for the heading
+    heading = doc.add_heading('Intake Form', level=0)
+    heading.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # Apply custom styling to the heading
+    run = heading.runs[0]
+    run.font.size = Pt(24)
+    run.bold = True
+
+    # Add a line break for spacing
+    doc.add_paragraph()
+
+    # Assuming the form_data has all the fields in the correct order
+
+    # Fields for Application Details Form
+    doc.add_paragraph('Application Details Form:', style='Heading 1')
+    fields_application_details = [
+        ("Form ID", form_data[0]),
+        ("List of Applications", form_data[1]),
+        ("Application ID", form_data[2]),
+        ("Application Name", form_data[3]),
+        ("Owner", form_data[4]),
+        ("Creation Date", form_data[5])
+    ]
+
+    # Fields for Secure Role Form
+    doc.add_paragraph('Secure Role Form:', style='Heading 1')
+    fields_secure_role = [
+        ("Secure Role ID", form_data[6]),
+        ("Role Name", form_data[7]),
+        ("Role Description", form_data[8]),
+        ("Role Type", form_data[9]),
+        ("Access Level", form_data[10]),
+        ("Owner", form_data[11]),
+        ("Request Date", form_data[12])
+    ]
+
+    # Fields for Role Modification Form
+    doc.add_paragraph('Role Modification Form:', style='Heading 1')
+    fields_role_modification = [
+        ("Modification ID", form_data[13]),
+        ("Current Role", form_data[14]),
+        ("Requested Modifications", form_data[15]),
+        ("Reason for Modification", form_data[16]),
+        ("Request Date", form_data[17]),
+        ("Owner", form_data[18])
+    ]
+
+    # Fields for Data Request Form
+    doc.add_paragraph('Data Request Form:', style='Heading 1')
+    fields_data_request = [
+        ("Data Request ID", form_data[19]),
+        ("Requested Data", form_data[20]),
+        ("Purpose", form_data[21]),
+        ("Request Date", form_data[22]),
+        ("Owner", form_data[23]),
+        ("Approval Status", form_data[24])
+    ]
+
+    # Fields for Host Request Form
+    doc.add_paragraph('Host Request Form:', style='Heading 1')
+    fields_host_request = [
+        ("Host Request ID", form_data[25]),
+        ("Requested Host", form_data[26]),
+        ("Purpose", form_data[27]),
+        ("Request Date", form_data[28]),
+        ("Owner", form_data[29]),
+        ("Approval Status", form_data[30])
+    ]
+
+    # Fields for Group Request Form
+    doc.add_paragraph('Group Request Form:', style='Heading 1')
+    fields_group_request = [
+        ("Group Request ID", form_data[31]),
+        ("Requested Group", form_data[32]),
+        ("Group Purpose", form_data[33]),
+        ("Request Date", form_data[34]),
+        ("Owner", form_data[35]),
+        ("Approval Status", form_data[36])
+    ]
+
+    # Add fields to the document with styling
+    all_fields = [
+        fields_application_details, 
+        fields_secure_role, 
+        fields_role_modification,
+        fields_data_request, 
+        fields_host_request, 
+        fields_group_request
+    ]
+
+    # Iterate through each form's fields and add to document
+    for field_set in all_fields:
+        for field_name, field_value in field_set:
+            para = doc.add_paragraph()
+            run = para.add_run(f"{field_name}: ")
+            run.bold = True
+            run.font.size = Pt(12)
+
+            # Add field value
+            run = para.add_run(str(field_value))
+            run.font.size = Pt(12)
+
+            # Add a line break after each entry
+            doc.add_paragraph()
+
+    # Prepare the document for download
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+
+    response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    response['Content-Disposition'] = f'attachment; filename=Intake_Form_{intake_form_id}.docx'
+
+    return response
