@@ -1,132 +1,116 @@
 import io
-from docx import Document
 from django.http import HttpResponse
 from django.db import connection
-from docx.shared import Pt
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx import Document
 
 def download_form(request, intake_form_id):
-    # SQL query to fetch form data
-    query = """
-    SELECT * FROM intake_form
-    WHERE id = %s
+    # Query to fetch data from application_details_form
+    query_application_details = """
+    SELECT * FROM application_details_form
+    WHERE intake_form_id = %s
     """
     
-    with connection.cursor() as cursor:
-        cursor.execute(query, [intake_form_id])
-        form_data = cursor.fetchone()
+    # Query to fetch data from secure_role_form
+    query_secure_role = """
+    SELECT * FROM secure_role_form
+    WHERE intake_form_id = %s
+    """
     
-    if not form_data:
-        return HttpResponse("Form not found.", status=404)
+    # Query to fetch data from role_modification_form
+    query_role_modification = """
+    SELECT * FROM role_modification_form
+    WHERE intake_form_id = %s
+    """
+    
+    # Query to fetch data from data_req_form
+    query_data_req = """
+    SELECT * FROM data_req_form
+    WHERE intake_form_id = %s
+    """
+    
+    # Query to fetch data from host_req_form
+    query_host_req = """
+    SELECT * FROM host_req_form
+    WHERE intake_form_id = %s
+    """
+    
+    # Query to fetch data from group_req_form
+    query_group_req = """
+    SELECT * FROM group_req_form
+    WHERE intake_form_id = %s
+    """
+
+    with connection.cursor() as cursor:
+        # Fetch data from all 6 tables
+        cursor.execute(query_application_details, [intake_form_id])
+        application_details_data = cursor.fetchone()
+
+        cursor.execute(query_secure_role, [intake_form_id])
+        secure_role_data = cursor.fetchone()
+
+        cursor.execute(query_role_modification, [intake_form_id])
+        role_modification_data = cursor.fetchone()
+
+        cursor.execute(query_data_req, [intake_form_id])
+        data_req_data = cursor.fetchone()
+
+        cursor.execute(query_host_req, [intake_form_id])
+        host_req_data = cursor.fetchone()
+
+        cursor.execute(query_group_req, [intake_form_id])
+        group_req_data = cursor.fetchone()
+
+    # Check if any of the forms return None (if they don't exist)
+    if not application_details_data:
+        return HttpResponse("Application details form not found.", status=404)
 
     # Create a Word document
     doc = Document()
+    doc.add_heading('Form Data', 0)
 
-    # Custom styling: setting title, font, and alignment for the heading
-    heading = doc.add_heading('Intake Form', level=0)
-    heading.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    # Adding application details form data to the document
+    doc.add_heading('Application Details Form', level=1)
+    doc.add_paragraph(f"Form ID: {application_details_data[0]}")
+    doc.add_paragraph(f"List of Applications: {application_details_data[1]}")
+    doc.add_paragraph(f"Application ID: {application_details_data[2]}")
+    doc.add_paragraph(f"Application Name: {application_details_data[3]}")
+    doc.add_paragraph(f"Owner: {application_details_data[4]}")
+    doc.add_paragraph(f"Creation Date: {application_details_data[5]}")
 
-    # Apply custom styling to the heading
-    run = heading.runs[0]
-    run.font.size = Pt(24)
-    run.bold = True
+    # Adding secure role form data
+    if secure_role_data:
+        doc.add_heading('Secure Role Form', level=1)
+        doc.add_paragraph(f"Role Name: {secure_role_data[1]}")
+        doc.add_paragraph(f"Role Type: {secure_role_data[2]}")
+        doc.add_paragraph(f"Access Level: {secure_role_data[3]}")
 
-    # Add a line break for spacing
-    doc.add_paragraph()
+    # Adding role modification form data
+    if role_modification_data:
+        doc.add_heading('Role Modification Form', level=1)
+        doc.add_paragraph(f"Role ID: {role_modification_data[1]}")
+        doc.add_paragraph(f"Role Status: {role_modification_data[2]}")
+        doc.add_paragraph(f"Requested By: {role_modification_data[3]}")
 
-    # Assuming the form_data has all the fields in the correct order
+    # Adding data request form data
+    if data_req_data:
+        doc.add_heading('Data Request Form', level=1)
+        doc.add_paragraph(f"Data Request ID: {data_req_data[1]}")
+        doc.add_paragraph(f"Data Type: {data_req_data[2]}")
+        doc.add_paragraph(f"Purpose: {data_req_data[3]}")
 
-    # Fields for Application Details Form
-    doc.add_paragraph('Application Details Form:', style='Heading 1')
-    fields_application_details = [
-        ("Form ID", form_data[0]),
-        ("List of Applications", form_data[1]),
-        ("Application ID", form_data[2]),
-        ("Application Name", form_data[3]),
-        ("Owner", form_data[4]),
-        ("Creation Date", form_data[5])
-    ]
+    # Adding host request form data
+    if host_req_data:
+        doc.add_heading('Host Request Form', level=1)
+        doc.add_paragraph(f"Host Name: {host_req_data[1]}")
+        doc.add_paragraph(f"Environment: {host_req_data[2]}")
+        doc.add_paragraph(f"IP Address: {host_req_data[3]}")
 
-    # Fields for Secure Role Form
-    doc.add_paragraph('Secure Role Form:', style='Heading 1')
-    fields_secure_role = [
-        ("Secure Role ID", form_data[6]),
-        ("Role Name", form_data[7]),
-        ("Role Description", form_data[8]),
-        ("Role Type", form_data[9]),
-        ("Access Level", form_data[10]),
-        ("Owner", form_data[11]),
-        ("Request Date", form_data[12])
-    ]
-
-    # Fields for Role Modification Form
-    doc.add_paragraph('Role Modification Form:', style='Heading 1')
-    fields_role_modification = [
-        ("Modification ID", form_data[13]),
-        ("Current Role", form_data[14]),
-        ("Requested Modifications", form_data[15]),
-        ("Reason for Modification", form_data[16]),
-        ("Request Date", form_data[17]),
-        ("Owner", form_data[18])
-    ]
-
-    # Fields for Data Request Form
-    doc.add_paragraph('Data Request Form:', style='Heading 1')
-    fields_data_request = [
-        ("Data Request ID", form_data[19]),
-        ("Requested Data", form_data[20]),
-        ("Purpose", form_data[21]),
-        ("Request Date", form_data[22]),
-        ("Owner", form_data[23]),
-        ("Approval Status", form_data[24])
-    ]
-
-    # Fields for Host Request Form
-    doc.add_paragraph('Host Request Form:', style='Heading 1')
-    fields_host_request = [
-        ("Host Request ID", form_data[25]),
-        ("Requested Host", form_data[26]),
-        ("Purpose", form_data[27]),
-        ("Request Date", form_data[28]),
-        ("Owner", form_data[29]),
-        ("Approval Status", form_data[30])
-    ]
-
-    # Fields for Group Request Form
-    doc.add_paragraph('Group Request Form:', style='Heading 1')
-    fields_group_request = [
-        ("Group Request ID", form_data[31]),
-        ("Requested Group", form_data[32]),
-        ("Group Purpose", form_data[33]),
-        ("Request Date", form_data[34]),
-        ("Owner", form_data[35]),
-        ("Approval Status", form_data[36])
-    ]
-
-    # Add fields to the document with styling
-    all_fields = [
-        fields_application_details, 
-        fields_secure_role, 
-        fields_role_modification,
-        fields_data_request, 
-        fields_host_request, 
-        fields_group_request
-    ]
-
-    # Iterate through each form's fields and add to document
-    for field_set in all_fields:
-        for field_name, field_value in field_set:
-            para = doc.add_paragraph()
-            run = para.add_run(f"{field_name}: ")
-            run.bold = True
-            run.font.size = Pt(12)
-
-            # Add field value
-            run = para.add_run(str(field_value))
-            run.font.size = Pt(12)
-
-            # Add a line break after each entry
-            doc.add_paragraph()
+    # Adding group request form data
+    if group_req_data:
+        doc.add_heading('Group Request Form', level=1)
+        doc.add_paragraph(f"Group Name: {group_req_data[1]}")
+        doc.add_paragraph(f"Group Type: {group_req_data[2]}")
+        doc.add_paragraph(f"Group Owner: {group_req_data[3]}")
 
     # Prepare the document for download
     buffer = io.BytesIO()
