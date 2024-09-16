@@ -1,15 +1,21 @@
-from django.template.loader import render_to_string
-from weasyprint import HTML
 from django.http import HttpResponse
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+import io
 
-def download_preview_as_pdf(request, intake_form_id):
+def download_preview_as_pdf_xhtml2pdf(request, intake_form_id):
     # Render preview_form.html with necessary context data
     html_string = render_to_string('preview_form.html', {'form_id': intake_form_id})
 
-    # Create PDF from HTML string
-    pdf_file = HTML(string=html_string).write_pdf()
+    # Create a PDF file from the HTML content
+    pdf_file = io.BytesIO()
+    pisa_status = pisa.CreatePDF(html_string, dest=pdf_file)
+
+    if pisa_status.err:
+        return HttpResponse("Error rendering PDF", status=500)
 
     # Prepare the response as a PDF file download
+    pdf_file.seek(0)
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="Form_{intake_form_id}.pdf"'
     
