@@ -1,15 +1,15 @@
-CREATE TABLE sync_config (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    app_name VARCHAR(50) NOT NULL,
-    Secure_Application_Name VARCHAR(255) NOT NULL,
-    Application_MUI VARCHAR(255) NOT NULL,
-    Secure_Environment VARCHAR(255) NOT NULL,
-    Secure_Role_Name VARCHAR(255) NOT NULL,
-    Member_Identifier VARCHAR(255) NOT NULL,
-    Member_Identifier_Type VARCHAR(255) NOT NULL,
-    Database_Name VARCHAR(255),
-    Batch_Role_or_Support_Team_Member VARCHAR(255),
-    Restricted_to_IDs VARCHAR(255),
-    Viewpoint_Role VARCHAR(255),
-    Role_Complete VARCHAR(255)
-);
+import MySQLdb
+
+def connect_db():
+    try:
+        conn = MySQLdb.connect(
+            host='your_mysql_host',       # e.g., 'localhost'
+            user='your_mysql_user',       # MySQL username
+            password='your_mysql_password', # MySQL password
+            database='your_database_name', # MySQL database name
+            port=3306                     # MySQL port (default is 3306)
+        )
+        return conn
+    except MySQLdb.Error as e:
+        print(f"Error connecting to MySQL: {e}")
+        return None
