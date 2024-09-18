@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Entries for {{ app_name }}</title>
+    <title>Select Application</title>
     <style>
         /* Global Settings */
         body {
@@ -17,12 +17,12 @@
         /* Navbar */
         .navbar {
             background-color: #1f1f1f;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
             padding: 15px;
             text-align: center;
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
         }
 
         .navbar a {
@@ -55,9 +55,8 @@
             border-radius: 20px;
             padding: 40px;
             box-shadow: 20px 20px 60px #1c1c1c, -20px -20px 60px #3a3a3a;
-            width: 80%;
+            width: 60%;
             margin: 0 auto;
-            margin-bottom: 40px;
         }
 
         .card h2 {
@@ -65,76 +64,60 @@
             margin-bottom: 20px;
         }
 
-        .table-container {
-            overflow-x: auto;
-            margin-bottom: 30px;
+        .select-app {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        select {
+            width: 300px;
+            padding: 15px;
             background-color: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            overflow: hidden;
+            color: white;
+            font-size: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            transition: border-color 0.3s ease;
         }
 
-        table, th, td {
-            padding: 15px;
-            border: none;
+        select:hover {
+            border-color: #4CAF50;
         }
 
-        th {
-            text-align: left;
-            font-weight: bold;
-            color: #e2e2e2;
-        }
-
-        td {
-            color: #cccccc;
-        }
-
-        th, td {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Buttons */
-        button, .btn {
-            display: inline-block;
+        button {
+            display: block;
             background: linear-gradient(145deg, #383838, #323232);
             color: #ffffff;
-            padding: 12px 25px;
+            padding: 15px 30px;
             border: none;
             border-radius: 30px;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
-            margin: 20px auto;
+            margin: 30px auto;
             transition: 0.3s;
             box-shadow: 10px 10px 20px #1c1c1c, -10px -10px 20px #3a3a3a;
         }
 
-        button:hover, .btn:hover {
+        button:hover {
             background-color: #4CAF50;
             box-shadow: 0px 10px 15px rgba(76, 175, 80, 0.3);
         }
 
         /* Responsive Design */
         @media only screen and (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
             h1 {
                 font-size: 2.5rem;
             }
 
             .card {
-                width: 100%;
+                width: 90%;
                 padding: 30px;
             }
 
-            table, th, td {
-                padding: 10px;
+            select {
+                width: 100%;
             }
 
             button {
@@ -151,102 +134,32 @@
     </div>
 
     <!-- Heading -->
-    <h1>Edit Entries for {{ app_name }}</h1>
+    <h1>Select an Application</h1>
 
-    <!-- Form to Add New Entries -->
+    <!-- Card Container for the Select Box -->
     <div class="card">
-        <h2>Add New Entry</h2>
-        <form method="POST">
-            {% csrf_token %}
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Secure Application Name</th>
-                            <th>Application MUI</th>
-                            <th>Secure Environment</th>
-                            <th>Secure Role Name</th>
-                            <th>Member Identifier</th>
-                            <th>Member Identifier Type</th>
-                            <th>Database Name</th>
-                            <th>Batch Role or Support Team Member</th>
-                            <th>Restricted to IDs</th>
-                            <th>Viewpoint Role</th>
-                            <th>Role Complete</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><input type="text" name="Secure_Application_Name" required></td>
-                            <td><input type="text" name="Application_MUI" required></td>
-                            <td><input type="text" name="Secure_Environment" required></td>
-                            <td><input type="text" name="Secure_Role_Name" required></td>
-                            <td><input type="text" name="Member_Identifier" required></td>
-                            <td><input type="text" name="Member_Identifier_Type" required></td>
-                            <td><input type="text" name="Database_Name"></td>
-                            <td><input type="text" name="Batch_Role_or_Support_Team_Member"></td>
-                            <td><input type="text" name="Restricted_to_IDs"></td>
-                            <td><input type="text" name="Viewpoint_Role"></td>
-                            <td><input type="text" name="Role_Complete"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <button type="submit">Add Entry</button>
-        </form>
-    </div>
+        <h2>Choose an Application</h2>
 
-    <!-- Existing Entries Section -->
-    <div class="card">
-        <h2>Existing Entries for {{ app_name }}</h2>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Secure Application Name</th>
-                        <th>Application MUI</th>
-                        <th>Secure Environment</th>
-                        <th>Secure Role Name</th>
-                        <th>Member Identifier</th>
-                        <th>Member Identifier Type</th>
-                        <th>Database Name</th>
-                        <th>Batch Role or Support Team Member</th>
-                        <th>Restricted to IDs</th>
-                        <th>Viewpoint Role</th>
-                        <th>Role Complete</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in entries %}
-                    <tr>
-                        <td>{{ entry.1 }}</td>
-                        <td>{{ entry.2 }}</td>
-                        <td>{{ entry.3 }}</td>
-                        <td>{{ entry.4 }}</td>
-                        <td>{{ entry.5 }}</td>
-                        <td>{{ entry.6 }}</td>
-                        <td>{{ entry.7 }}</td>
-                        <td>{{ entry.8 }}</td>
-                        <td>{{ entry.9 }}</td>
-                        <td>{{ entry.10 }}</td>
-                        <td>{{ entry.11 }}</td>
-                        <td>
-                            <form method="POST" action="{% url 'delete_entry' entry.0 app_name %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
+        <!-- Application Selection Form -->
+        <div class="select-app">
+            <form method="GET">
+                <label for="app_name" style="display: none;">Choose Application</label>
+                <select name="app_name" id="app_name" onchange="window.location.href='/edit_entries/' + this.value;">
+                    <option value="">-- Select --</option>
+                    {% for app in apps %}
+                    <option value="{{ app }}">{{ app }}</option>
                     {% endfor %}
-                </tbody>
-            </table>
+                </select>
+            </form>
         </div>
-    </div>
 
-    <!-- Generate CSV Section -->
-    <div class="generate-csv">
-        <a href="/generate_csv/{{ app_name }}/" class="btn">Generate CSV</a>
+        <!-- Submit Button (Optional if you don't want the select to auto-submit) -->
+        <!-- Uncomment this button if you prefer to have a manual submission -->
+        <!--
+        <button type="submit" onclick="window.location.href='/edit_entries/' + document.getElementById('app_name').value;">
+            Proceed
+        </button>
+        -->
     </div>
 
 </body>
