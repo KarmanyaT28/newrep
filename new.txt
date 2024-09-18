@@ -73,6 +73,17 @@
         button:hover {
             background-color: #45a049;
         }
+        .delete-button {
+            background-color: #ff4c4c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #e60000;
+        }
         .view-files {
             margin-top: 20px;
             text-align: center;
@@ -97,7 +108,7 @@
 
     <!-- Navbar -->
     <div class="navbar">
-        <a href="/">Dashboard</a>  <!-- Link to the dashboard to select assets -->
+        <a href="/">Dashboard</a>
     </div>
 
     <h1>Edit Entries for {{ app_name }}</h1>
@@ -120,6 +131,7 @@
                         <th>Restricted to IDs</th>
                         <th>Viewpoint Role</th>
                         <th>Role Complete</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -135,6 +147,7 @@
                         <td><input type="text" name="Restricted_to_IDs"></td>
                         <td><input type="text" name="Viewpoint_Role"></td>
                         <td><input type="text" name="Role_Complete"></td>
+                        <td></td>
                     </tr>
                 </tbody>
             </table>
@@ -143,9 +156,9 @@
         <button type="submit">Add Entry</button>
     </form>
 
-    <!-- Section to View Existing Files -->
+    <!-- Section to View and Delete Existing Files -->
     <div class="view-files">
-        <h2>View Existing Entries for {{ app_name }}</h2>
+        <h2>View and Delete Existing Entries for {{ app_name }}</h2>
         <div class="table-container">
             <table>
                 <thead>
@@ -161,6 +174,7 @@
                         <th>Restricted to IDs</th>
                         <th>Viewpoint Role</th>
                         <th>Role Complete</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -171,23 +185,4 @@
                         <td>{{ entry.3 }}</td>
                         <td>{{ entry.4 }}</td>
                         <td>{{ entry.5 }}</td>
-                        <td>{{ entry.6 }}</td>
-                        <td>{{ entry.7 }}</td>
-                        <td>{{ entry.8 }}</td>
-                        <td>{{ entry.9 }}</td>
-                        <td>{{ entry.10 }}</td>
-                        <td>{{ entry.11 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Button to Generate CSV -->
-    <div class="generate-csv">
-        <a href="/generate_csv/{{ app_name }}/">Generate CSV</a>
-    </div>
-
-</body>
-</html>
+   
