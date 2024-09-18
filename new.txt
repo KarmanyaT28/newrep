@@ -1,15 +1,95 @@
 import MySQLdb
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+import pandas as pd
 
+# MySQL database connection
 def connect_db():
     try:
         conn = MySQLdb.connect(
-            host='your_mysql_host',       # e.g., 'localhost'
-            user='your_mysql_user',       # MySQL username
+            host='your_mysql_host',         # e.g., 'localhost'
+            user='your_mysql_user',         # MySQL username
             password='your_mysql_password', # MySQL password
-            database='your_database_name', # MySQL database name
-            port=3306                     # MySQL port (default is 3306)
+            database='your_database_name',  # MySQL database name
+            port=3306                       # MySQL port (default is 3306)
         )
         return conn
     except MySQLdb.Error as e:
         print(f"Error connecting to MySQL: {e}")
         return None
+
+# Dashboard view to select an application
+def dashboard(request):
+    apps = ['CRM', 'DMA', 'DMM', 'DMU', 'DS3', 'GALAXY', 'MLA', 'NHI', 'OFF', 'RDM', 'RTS', 'STR', 'RPS']
+    return render(request, 'dashboard.html', {'apps': apps})
+
+# View to display and edit entries for a specific app
+def edit_entries(request, app_name):
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    # Fetch the data for the selected application
+    query = "SELECT * FROM sync_config WHERE app_name=%s"
+    cursor.execute(query, (app_name,))
+    entries = cursor.fetchall()
+
+    if request.method == 'POST':
+        # Handle adding a new entry
+        secure_application_name = request.POST.get('Secure_Application_Name')
+        application_mui = request.POST.get('Application_MUI')
+        secure_environment = request.POST.get('Secure_Environment')
+        secure_role_name = request.POST.get('Secure_Role_Name')
+        member_identifier = request.POST.get('Member_Identifier')
+        member_identifier_type = request.POST.get('Member_Identifier_Type')
+        database_name = request.POST.get('Database_Name')
+        batch_role_or_support_team_member = request.POST.get('Batch_Role_or_Support_Team_Member')
+        restricted_to_ids = request.POST.get('Restricted_to_IDs')
+        viewpoint_role = request.POST.get('Viewpoint_Role')
+        role_complete = request.POST.get('Role_Complete')
+
+        insert_query = """
+            INSERT INTO sync_config (
+                app_name, Secure_Application_Name, Application_MUI, Secure_Environment, 
+                Secure_Role_Name, Member_Identifier, Member_Identifier_Type, Database_Name, 
+                Batch_Role_or_Support_Team_Member, Restricted_to_IDs, Viewpoint_Role, Role_Complete
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (
+            app_name, secure_application_name, application_mui, secure_environment, 
+            secure_role_name, member_identifier, member_identifier_type, database_name, 
+            batch_role_or_support_team_member, restricted_to_ids, viewpoint_role, role_complete
+        ))
+        conn.commit()
+        return redirect(f'/edit_entries/{app_name}/')
+
+    return render(request, 'edit_entries.html', {'entries': entries, 'app_name': app_name})
+
+# View to generate the CSV file
+def generate_csv(request, app_name):
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    # Fetch the data for the selected application
+    query = """
+        SELECT 
+            Secure_Application_Name, Application_MUI, Secure_Environment, Secure_Role_Name, 
+            Member_Identifier, Member_Identifier_Type, Database_Name, 
+            Batch_Role_or_Support_Team_Member, Restricted_to_IDs, Viewpoint_Role, Role_Complete
+        FROM sync_config WHERE app_name=%s
+    """
+    cursor.execute(query, (app_name,))
+    rows = cursor.fetchall()
+
+    # Convert the data into a DataFrame and then to CSV
+    columns = [
+        'Secure_Application_Name', 'Application_MUI', 'Secure_Environment', 'Secure_Role_Name', 
+        'Member_Identifier', 'Member_Identifier_Type', 'Database_Name', 
+        'Batch_Role_or_Support_Team_Member', 'Restricted_to_IDs', 'Viewpoint_Role', 'Role_Complete'
+    ]
+    df = pd.DataFrame(rows, columns=columns)
+    csv_data = df.to_csv(index=False)
+
+    # Return the CSV file as an HTTP response
+    response = HttpResponse(csv_data, content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename=sync_{app_name}.csv'
+    return response
