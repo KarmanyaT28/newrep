@@ -1,0 +1,316 @@
+1. requirements.txt:
+makefile
+Copy code
+Django==4.2
+pandas==2.0.0
+pyodbc==4.0.32
+django-widget-tweaks==1.4.10
+openpyxl==3.1.2
+Install the requirements by running:
+
+bash
+Copy code
+pip install -r requirements.txt
+2. SQL Table Creation:
+Here’s the SQL script to create the table structure based on the columns from your Excel file:
+
+sql
+Copy code
+CREATE TABLE sync_config (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    app_name VARCHAR(50),
+    Secure_Application_Name VARCHAR(255),
+    Application_MUI VARCHAR(255),
+    Secure_Environment VARCHAR(255),
+    Secure_Role_Name VARCHAR(255),
+    Member_Identifier VARCHAR(255),
+    Member_Identifier_Type VARCHAR(255),
+    Database_Name VARCHAR(255),
+    Batch_Role_or_Support_Team_Member VARCHAR(255),
+    Restricted_to_IDs VARCHAR(255),
+    Viewpoint_Role VARCHAR(255),
+    Role_Complete VARCHAR(255)
+);
+3. settings.py:
+Configure your database and other settings in settings.py.
+
+python
+Copy code
+# settings.py
+
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'myapp',
+]
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'sql_server.pyodbc',
+        'NAME': 'SECDEVDB',
+        'USER': 'your_db_user',
+        'PASSWORD': 'your_db_password',
+        'HOST': 'your_db_host',
+        'PORT': 'your_db_port',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+        },
+    }
+}
+
+STATIC_URL = '/static/'
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'myapp', 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.request',
+            ],
+        },
+    },
+]
+4. urls.py:
+Define your URL patterns.
+
+python
+Copy code
+from django.urls import path
+from myapp import views
+
+urlpatterns = [
+    path('', views.dashboard, name='dashboard'),
+    path('edit_entries/<str:app_name>/', views.edit_entries, name='edit_entries'),
+    path('generate_csv/<str:app_name>/', views.generate_csv, name='generate_csv'),
+]
+5. views.py:
+Here is the logic for your Django views.
+
+python
+Copy code
+import pandas as pd
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+import pyodbc
+
+# SQL connection
+def connect_db():
+    conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
+                          'SERVER=your_db_host;'
+                          'DATABASE=SECDEVDB;'
+                          'UID=your_db_user;'
+                          'PWD=your_db_password;')
+    return conn
+
+# Dashboard where user selects an application
+def dashboard(request):
+    apps = ['CRM', 'DMA', 'DMM', 'DMU', 'DS3', 'GALAXY', 'MLA', 'NHI', 'OFF', 'RDM', 'RTS', 'STR', 'RPS']
+    return render(request, 'dashboard.html', {'apps': apps})
+
+# View to display and edit entries for a specific app
+def edit_entries(request, app_name):
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    # Fetch the data for the selected application
+    query = f"SELECT * FROM sync_config WHERE app_name='{app_name}'"
+    cursor.execute(query)
+    entries = cursor.fetchall()
+
+    if request.method == 'POST':
+        # Handle adding a new entry
+        secure_application_name = request.POST.get('Secure_Application_Name')
+        application_mui = request.POST.get('Application_MUI')
+        secure_environment = request.POST.get('Secure_Environment')
+        secure_role_name = request.POST.get('Secure_Role_Name')
+        member_identifier = request.POST.get('Member_Identifier')
+        member_identifier_type = request.POST.get('Member_Identifier_Type')
+        database_name = request.POST.get('Database_Name')
+        batch_role_or_support_team_member = request.POST.get('Batch_Role_or_Support_Team_Member')
+        restricted_to_ids = request.POST.get('Restricted_to_IDs')
+        viewpoint_role = request.POST.get('Viewpoint_Role')
+        role_complete = request.POST.get('Role_Complete')
+
+        insert_query = f"""
+            INSERT INTO sync_config (
+                app_name, Secure_Application_Name, Application_MUI, Secure_Environment, 
+                Secure_Role_Name, Member_Identifier, Member_Identifier_Type, Database_Name, 
+                Batch_Role_or_Support_Team_Member, Restricted_to_IDs, Viewpoint_Role, Role_Complete
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        cursor.execute(insert_query, (
+            app_name, secure_application_name, application_mui, secure_environment, 
+            secure_role_name, member_identifier, member_identifier_type, database_name, 
+            batch_role_or_support_team_member, restricted_to_ids, viewpoint_role, role_complete
+        ))
+        conn.commit()
+        return redirect(f'/edit_entries/{app_name}/')
+
+    return render(request, 'edit_entries.html', {'entries': entries, 'app_name': app_name})
+
+# View to generate the CSV file
+def generate_csv(request, app_name):
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    # Fetch the data for the selected application
+    query = f"""
+        SELECT 
+            Secure_Application_Name, Application_MUI, Secure_Environment, Secure_Role_Name, 
+            Member_Identifier, Member_Identifier_Type, Database_Name, 
+            Batch_Role_or_Support_Team_Member, Restricted_to_IDs, Viewpoint_Role, Role_Complete
+        FROM sync_config WHERE app_name='{app_name}'
+    """
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    # Convert the data into a DataFrame and then to CSV
+    columns = [
+        'Secure_Application_Name', 'Application_MUI', 'Secure_Environment', 'Secure_Role_Name', 
+        'Member_Identifier', 'Member_Identifier_Type', 'Database_Name', 
+        'Batch_Role_or_Support_Team_Member', 'Restricted_to_IDs', 'Viewpoint_Role', 'Role_Complete'
+    ]
+    df = pd.DataFrame(rows, columns=columns)
+    csv_data = df.to_csv(index=False)
+
+    # Return the CSV file as an HTTP response
+    response = HttpResponse(csv_data, content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename=sync_{app_name}.csv'
+    return response
+6. Templates:
+dashboard.html:
+html
+Copy code
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Application</title>
+</head>
+<body>
+    <h1>Select an Application</h1>
+    <form method="GET">
+        <label for="app_name">Choose an Application:</label>
+        <select name="app_name" id="app_name" onchange="window.location.href='/edit_entries/' + this.value;">
+            {% for app in apps %}
+            <option value="{{ app }}">{{ app }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</body>
+</html>
+edit_entries.html:
+html
+Copy code
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Entries for {{ app_name }}</title>
+</head>
+<body>
+    <h1>Edit Entries for {{ app_name }}</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="Secure_Application_Name">Secure Application Name:</label>
+        <input type="text" name="Secure_Application_Name" required><br>
+        <label for="Application_MUI">Application MUI:</label>
+        <input type="text" name="Application_MUI" required><br>
+        <label for="Secure_Environment">Secure Environment:</label>
+        <input type="text" name="Secure_Environment" required><br>
+        <label for="Secure_Role_Name">Secure Role Name:</label>
+        <input type="text" name="Secure_Role_Name" required><br>
+        <label for="Member_Identifier">Member Identifier:</label>
+        <input type="text" name="Member_Identifier" required><br>
+        <label for="Member_Identifier_Type">Member Identifier Type:</label>
+        <input type="text" name="Member_Identifier_Type" required><br>
+        <label for="
+
+
+
+
+
+You said:
+why stopped?
+ChatGPT said:
+ChatGPT
+Here is the remaining part of the edit_entries.html form and the full code:
+
+Remaining edit_entries.html:
+html
+Copy code
+        <label for="Database_Name">Database Name (if applicable):</label>
+        <input type="text" name="Database_Name"><br>
+        <label for="Batch_Role_or_Support_Team_Member">Batch Role or Support Team Member:</label>
+        <input type="text" name="Batch_Role_or_Support_Team_Member"><br>
+        <label for="Restricted_to_IDs">Restricted to IDs:</label>
+        <input type="text" name="Restricted_to_IDs"><br>
+        <label for="Viewpoint_Role">Viewpoint Role:</label>
+        <input type="text" name="Viewpoint_Role"><br>
+        <label for="Role_Complete">Role Complete:</label>
+        <input type="text" name="Role_Complete"><br>
+
+        <button type="submit">Add Entry</button>
+    </form>
+
+    <h2>Existing Entries</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Secure Application Name</th>
+                <th>Application MUI</th>
+                <th>Secure Environment</th>
+                <th>Secure Role Name</th>
+                <th>Member Identifier</th>
+                <th>Member Identifier Type</th>
+                <th>Database Name</th>
+                <th>Batch Role or Support Team Member</th>
+                <th>Restricted to IDs</th>
+                <th>Viewpoint Role</th>
+                <th>Role Complete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+            <tr>
+                <td>{{ entry.1 }}</td>
+                <td>{{ entry.2 }}</td>
+                <td>{{ entry.3 }}</td>
+                <td>{{ entry.4 }}</td>
+                <td>{{ entry.5 }}</td>
+                <td>{{ entry.6 }}</td>
+                <td>{{ entry.7 }}</td>
+                <td>{{ entry.8 }}</td>
+                <td>{{ entry.9 }}</td>
+                <td>{{ entry.10 }}</td>
+                <td>{{ entry.11 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="/generate_csv/{{ app_name }}/">Generate CSV</a>
+</body>
+</html>
+Full Instructions to Run the App:
+SQL Setup: Run the provided SQL script to create the sync_config table.
+Django Setup:
+Install the necessary Python libraries (pandas, pyodbc, django-widget-tweaks).
+Create your Django project and add the code I provided in the respective files.
+Update your settings.py with the correct SQL Server database connection.
+Migrations: You don't need Django models since you're using raw SQL queries in views.py, so no migrations are required.
+Run the Server:
+bash
+Copy code
+python manage.py runserver
+Access the Application: Go to http://localhost:8000/ in your browser to access the dashboard, select an application, edit entries, and generate the sync CSV files.
+This complete solution meets your requirements of creating and modifying entries directly in the database for different applications and generating a sync_RPS.csv file without the need for SharePoint integration.
+
+Let me know if you have further questions or need additional adjustments!
