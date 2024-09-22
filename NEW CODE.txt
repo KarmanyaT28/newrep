@@ -1,766 +1,297 @@
 from django.shortcuts import render, redirect
 from django.db import connection
 from django.contrib.auth.decorators import login_required
-import logging
-from django.http import HttpResponse
-from docx import Document
-from docx.shared import Pt
-import io
-from django.shortcuts import render, redirect
-from django.http import HttpResponseForbidden
-from django.db import connection
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import io
-import io
-from django.http import HttpResponse
-from django.db import connection
-from docx import Document
-from docx import Document
-from django.http import HttpResponse
-from django.db import connection
-from docx.shared import Pt
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
-
-
-
-# # Function to save data into the database
-# def save_data(query, params=None):
-#     with connection.cursor() as cursor:
-#         cursor.execute(query, params)
-#         connection.commit()
-
-# # Auto-save form data
-# def auto_save(form_data, table_name, intake_form_id):
-#     for key, value in form_data.items():
-#         query = f"""
-#         UPDATE {table_name}
-#         SET {key} = %s
-#         WHERE intake_form_id = %s
-#         """
-#         save_data(query, [value, intake_form_id])
-
-# @csrf_exempt
-# def auto_save(request, intake_form_id):
-#     if request.method == 'POST':
-#         intake_form = IntakeForm.objects.get(id=intake_form_id)
-
-#         # Extract data from POST and update the form
-#         # Example for ApplicationDetailsForm
-#         application_details, created = ApplicationDetails.objects.get_or_create(intake_form=intake_form)
-#         application_details.application_name = request.POST.get('application_name')
-#         application_details.ask_id = request.POST.get('ask_id')
-#         application_details.functional_role = request.POST.get('functional_role')
-#         application_details.save()
-
-#         # Do the same for other sub-forms (SecureRoleDetails, RoleModificationLog, etc.)
-
-#         return JsonResponse({'status': 'success'})
-
-#     return JsonResponse({'status': 'failed'}, status=400)
-
-
-# Helper function to get form data
-def get_form_data(query, params=None):
-    with connection.cursor() as cursor:
-        cursor.execute(query, params)
-        return cursor.fetchone()
-
-# Helper function to update form data
-def update_form_data(query, params):
-    with connection.cursor() as cursor:
-        cursor.execute(query, params)
-
-
-# SQL query utility function
-def execute_sql_query(query, params=None):
-    with connection.cursor() as cursor:
-        cursor.execute(query, params or [])
-        if query.strip().upper().startswith("SELECT"):
-            return cursor.fetchall()
-        else:
-            connection.commit()
-@login_required
-def dashboard(request):
-    if not request.user.is_authenticated:
-        return redirect('accounts:login')
-
-    user_id = request.user.id
-
-    # Fetch forms based on status
-    in_progress_forms = execute_sql_query(
-        "SELECT id, title, creator_id, created_at FROM intake_form WHERE creator_id = %s AND status = 'In Progress'", [user_id])
-    submitted_forms = execute_sql_query(
-        "SELECT id, title, creator_id, created_at FROM intake_form WHERE creator_id = %s AND  status = 'Submitted'", [user_id])
-    pending_approval_forms = execute_sql_query(
-        "SELECT id, title, creator_id, created_at FROM intake_form WHERE creator_id = %s AND  status = 'Pending Approval'", [user_id])
-    approved_forms = execute_sql_query(
-        "SELECT id, title, creator_id, created_at FROM intake_form WHERE creator_id = %s AND  status = 'Approved'", [user_id])
-    mail_sent_forms = execute_sql_query(
-        "SELECT id, title, creator_id, created_at FROM intake_form WHERE creator_id = %s AND  status = 'Mail Sent'", [user_id])
-
-    context = {
-        'in_progress_forms': in_progress_forms,
-        'submitted_forms': submitted_forms,
-        'pending_approval_forms': pending_approval_forms,
-        'approved_forms': approved_forms,
-        'mail_sent_forms': mail_sent_forms,
-        'user_id': user_id,
-    }
-    
-    return render(request, 'intake/dashboard.html', context)
-# @login_required
-# def edit_intake_form(request, intake_form_id):
-#     if not request.user.is_authenticated:
-#         return redirect('accounts:login')
-
-#     user_id = request.user.id
-
-#     # Fetch the form with the given ID
-#     form = execute_sql_query("SELECT * FROM intake_form WHERE id = %s", [intake_form_id])
-#     if not form:
-#         return HttpResponseForbidden("Form not found.")
-    
-#     form = form[0]  # Get the first (and only) result
-
-#     # Check if the user is the creator of the form
-#     if form[2] != user_id:  # Assuming 'creator_id' is the 3rd column in the table
-#         return HttpResponseForbidden("You do not have permission to edit this form.")
-
-#     if request.method == 'POST':
-#         # Process the form data and update the form in the database
-#         title = request.POST.get('title')
-#         content = request.POST.get('content')
-#         status = request.POST.get('status')
-        
-#         # Update form in the database with an SQL query
-#         execute_sql_query(
-#             "UPDATE intake_form SET title = %s, content = %s, status = %s WHERE id = %s AND creator_id = %s",
-#             [title, content, status, intake_form_id, user_id]
-#         )
-#         return redirect('dashboard')
-
-#     context = {
-#         'form': form,
-#     }
-#     return render(request, 'intake/edit_intake_form.html', context)
-# @login_required
-# def preview_form(request, intake_form_id):
-#     if not request.user.is_authenticated:
-#         return redirect('accounts:login')
-
-#     user_id = request.user.id
-
-#     # Fetch the form with the given ID
-#     form = execute_sql_query("SELECT * FROM intake_forms WHERE id = %s", [intake_form_id])
-#     if not form:
-#         return HttpResponseForbidden("Form not found.")
-    
-#     form = form[0]  # Get the first (and only) result
-
-#     # The user can view the form but check for edit permissions
-#     can_edit = form[2] == user_id  # Assuming 'creator_id' is the 3rd column in the table
-
-#     context = {
-#         'form': form,
-#         'can_edit': can_edit,
-#     }
-#     return render(request, 'preview_form.html', context)
-
-
-
-
-
-@login_required
-def create_intake_form(request):
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO intake_form (title, creator_id, status) VALUES (%s, %s, %s)", [title, request.user.id, 'In Progress'])
-        return redirect('dashboard')
-    return render(request, 'intake/create_form.html')
-
-
-
-def application_details_form(request, intake_form_id):
-    if request.method == 'POST':
-        application_name = request.POST.get('application_name')
-        ask_id = request.POST.get('ask_id')
-        functional_role = request.POST.get('functional_role')
-
-
-        with connection.cursor() as cursor:
-            # Check if a record exists for this intake_form_id
-            cursor.execute('''
-                SELECT COUNT(*) FROM application_details WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            exists = cursor.fetchone()[0]
-
-            if exists:
-                # Update existing record
-                cursor.execute('''
-                    UPDATE application_details
-                    SET application_name = %s, ask_id = %s, functional_role = %s
-                    WHERE intake_form_id = %s
-                ''', [application_name, ask_id, functional_role, intake_form_id])
-            else:
-                # Insert new record
-                cursor.execute('''
-                    INSERT INTO application_details (intake_form_id,application_name, ask_id, functional_role)
-                    VALUES (%s, %s, %s, %s)
-                ''', [intake_form_id, application_name, ask_id, functional_role])
-
-        # return redirect('secure_role_form', intake_form_id=intake_form_id)
-        return redirect('preview_form', intake_form_id=intake_form_id)
-    else:
-        # Fetch the latest data from the database for pre-filling the form
-        with connection.cursor() as cursor:
-            cursor.execute('''
-                SELECT application_name, ask_id, functional_role
-                FROM application_details
-                WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            application_details_data = cursor.fetchone()
-
-        return render(request, 'intake/application_details_form.html', {
-            'application_details_data': application_details_data
-        })
-
-
-
+# Secure Role Details Form
 @login_required
 def secure_role_form(request, intake_form_id):
-    if request.method == 'POST':
-        secenv = request.POST.get('secenv')
-        secure_application = request.POST.get('secure_application')
-        secure_role = request.POST.get('secure_role')
-        secure_role_approvers = request.POST.get('secure_role_approvers')
-        as_of = request.POST.get('as_of')
-
-        with connection.cursor() as cursor:
-            cursor.execute('''
-                SELECT COUNT(*) FROM secure_role_details WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            exists = cursor.fetchone()[0]
-
-            if exists:
-                cursor.execute('''
-                    UPDATE secure_role_details
-                    SET secenv=%s, secure_application=%s, secure_role=%s, secure_role_approvers=%s, as_of=%s
-                    WHERE intake_form_id = %s
-                ''', [secenv, secure_application, secure_role, secure_role_approvers, as_of,intake_form_id])
-            else:
-                cursor.execute("""
-            INSERT INTO secure_role_details (intake_form_id,secenv, secure_application, secure_role, secure_role_approvers, as_of)
-                VALUES (%s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE secenv = VALUES(secenv), secure_application = VALUES(secure_application), secure_role = VALUES(secure_role), secure_role_approvers = VALUES(secure_role_approvers), as_of = VALUES(as_of)
-            """, [intake_form_id,secenv, secure_application, secure_role, secure_role_approvers, as_of])
-
-        # return redirect('role_modification_form', intake_form_id=intake_form_id)
-        return redirect('preview_form', intake_form_id=intake_form_id)
-    else:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-			SELECT secenv, secure_application, secure_role, secure_role_approvers, as_of
-            FROM secure_role_details
-            WHERE intake_form_id = %s
-			""", [intake_form_id])
-            secure_role_data = cursor.fetchone()
-
-        return render(request, 'intake/secure_role_form.html', {
-            'secure_role_data': secure_role_data
-        })
-
-
-@login_required
-def role_modification_form(request, intake_form_id):
-    if request.method == 'POST':
-        request_number = request.POST.get('request_number')
-        change_description = request.POST.get('change_description')
-        security_administrator_assigned = request.POST.get('security_administrator_assigned')
-        requesting_team_director_approval = request.POST.get('requesting_team_director_approval')
-        data_governance_approval = request.POST.get('data_governance_approval')
-        requesting_team_application_team_approval = request.POST.get('requesting_team_application_team_approval')
-        dba_approval = request.POST.get('dba_approval')
-
-        with connection.cursor() as cursor:
-            cursor.execute('''
-                SELECT COUNT(*) FROM role_modification_log WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            exists = cursor.fetchone()[0]
-
-            if exists:
-                cursor.execute('''
-                    UPDATE role_modification_log
-                    SET request_number = %s, change_description = %s, security_administrator_assigned = %s, requesting_team_director_approval = %s, data_governance_approval = %s, requesting_team_application_team_approval = %s, dba_approval = %s
-                    WHERE intake_form_id = %s
-                ''', [ request_number, change_description, security_administrator_assigned, requesting_team_director_approval, data_governance_approval, requesting_team_application_team_approval, dba_approval,intake_form_id])
-            else:
-                cursor.execute("""
-                INSERT INTO role_modification_log (intake_form_id, request_number, change_description, security_administrator_assigned, requesting_team_director_approval, data_governance_approval, requesting_team_application_team_approval, dba_approval)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE request_number = VALUES(request_number), change_description = VALUES(change_description), security_administrator_assigned = VALUES(security_administrator_assigned), requesting_team_director_approval = VALUES(requesting_team_director_approval), data_governance_approval = VALUES(data_governance_approval), requesting_team_application_team_approval = VALUES(requesting_team_application_team_approval), dba_approval = VALUES(dba_approval)
-            """, [intake_form_id, request_number, change_description, security_administrator_assigned, requesting_team_director_approval, data_governance_approval, requesting_team_application_team_approval, dba_approval])
-
-
-        # return redirect('data_req_form', intake_form_id=intake_form_id)
-        return redirect('preview_form', intake_form_id=intake_form_id)
-    else:
-        with connection.cursor() as cursor:
-            cursor.execute('''
-                SELECT request_number, change_description, security_administrator_assigned, requesting_team_director_approval, data_governance_approval, requesting_team_application_team_approval, dba_approval
-                FROM role_modification_log
-                WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            role_modification_data = cursor.fetchone()
-
-        return render(request, 'intake/role_modification_form.html', {
-            'role_modification_data': role_modification_data
-        })
-
-
-@login_required
-def data_req_form(request, intake_form_id):
-    if request.method == 'POST':
-        database_name = request.POST.get('database_name')
-        environment = request.POST.get('environment')
-        access_rights = request.POST.get('access_rights')
-        business_justification = request.POST.get('business_justification')
-
-        with connection.cursor() as cursor:
-            cursor.execute('''
-                SELECT COUNT(*) FROM data_req WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            exists = cursor.fetchone()[0]
-
-            if exists:
-                cursor.execute('''
-                    UPDATE data_req
-                    SET database_name = %s, environment = %s, access_rights = %s, business_justification = %s
-                    WHERE intake_form_id = %s
-                ''', [database_name, environment, access_rights, business_justification,intake_form_id])
-            else:
-                cursor.execute("""
-                INSERT INTO data_req (intake_form_id, database_name, environment, access_rights, business_justification)
-                VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE database_name = VALUES(database_name), environment = VALUES(environment), access_rights = VALUES(access_rights), business_justification = VALUES(business_justification)
-            """, [intake_form_id, database_name, environment, access_rights, business_justification])
-
-        # return redirect('host_req_form', intake_form_id=intake_form_id)
-        return redirect('preview_form', intake_form_id=intake_form_id)
-    else:
-        with connection.cursor() as cursor:
-            cursor.execute('''
-                SELECT database_name, environment, access_rights, business_justification
-                FROM data_req
-                WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            data_req_data = cursor.fetchone()
-
-        return render(request, 'intake/data_req_form.html', {
-            'data_req_data': data_req_data
-        })
-
-@login_required
-def host_req_form(request, intake_form_id):
-    if request.method == 'POST':
-        host = request.POST.get('host')
-        env = request.POST.get('env')
-        level_of_access = request.POST.get('level_of_access')
-        business_justification = request.POST.get('business_justification')
-
-        with connection.cursor() as cursor:
-            cursor.execute('''
-                SELECT COUNT(*) FROM host_req WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            exists = cursor.fetchone()[0]
-
-            if exists:
-                cursor.execute('''
-                    UPDATE host_req
-                    SET host = %s, env = %s, level_of_access = %s, business_justification = %s
-                    WHERE intake_form_id = %s
-                ''', [host, env, level_of_access, business_justification,intake_form_id])
-            else:
-                cursor.execute("""
-                INSERT INTO host_req (intake_form_id, host, env, level_of_access, business_justification)
-                VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE host = VALUES(host), env = VALUES(env), level_of_access = VALUES(level_of_access), business_justification = VALUES(business_justification)
-            """, [intake_form_id, host, env, level_of_access, business_justification])
-
-        # return redirect('group_req_form', intake_form_id=intake_form_id)
-        return redirect('preview_form', intake_form_id=intake_form_id)
-    else:
-        with connection.cursor() as cursor:
-            cursor.execute('''
-                SELECT host, env, level_of_access, business_justification
-                FROM host_req
-                WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            host_req_data = cursor.fetchone()
-
-        return render(request, 'intake/host_req_form.html', {
-            'host_req_data': host_req_data
-        })
-
-        
-@login_required
-def group_req_form(request, intake_form_id):
-    if request.method == 'POST':
-        group_name = request.POST.get('group_name')
-        group_type = request.POST.get('group_type')
-        description = request.POST.get('description')
-        business_justification = request.POST.get('business_justification')
-
-        with connection.cursor() as cursor:
-            cursor.execute('''
-                SELECT COUNT(*) FROM group_req WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            exists = cursor.fetchone()[0]
-
-            if exists:
-                cursor.execute('''
-                    UPDATE group_req
-                    SET group_name=%s, group_type=%s, description=%s, business_justification=%s
-                    WHERE intake_form_id = %s
-                ''', [group_name, group_type, description, business_justification,intake_form_id])
-            else:
-                cursor.execute("""
-                INSERT INTO group_req (intake_form_id, group_name, group_type, description, business_justification)
-                VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE group_name = VALUES(group_name), group_type = VALUES(group_type), description = VALUES(description), business_justification = VALUES(business_justification)
-            """, [intake_form_id, group_name, group_type, description, business_justification])
-
-        return redirect('preview_form', intake_form_id=intake_form_id)
-    else:
-        with connection.cursor() as cursor:
-            cursor.execute('''
-                SELECT group_name, group_type, description, business_justification
-                FROM group_req
-                WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            group_req_data = cursor.fetchone()
-
-        return render(request, 'intake/group_req_form.html', {
-            'group_req_data': group_req_data
-        })
-
-@login_required
-def preview_form(request, intake_form_id):
+    # Fetch all secure role details for this intake_form_id
     with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM intake_form WHERE id = %s", [intake_form_id])
-        form = cursor.fetchone()
+        cursor.execute("SELECT id, secenv, secure_application, secure_role, secure_role_approvers, as_of FROM secure_role_details WHERE intake_form_id = %s", [intake_form_id])
+        secure_role_entries = cursor.fetchall()
 
-        cursor.execute("SELECT * FROM application_details WHERE intake_form_id = %s", [intake_form_id])
-        application_details = cursor.fetchone()
+    if request.method == 'POST':
+        # Handle form submissions for adding new entries
+        if 'add_secure_role' in request.POST:
+            secenv = request.POST['secenv']
+            secure_application = request.POST['secure_application']
+            secure_role = request.POST['secure_role']
+            secure_role_approvers = request.POST['secure_role_approvers']
+            as_of = request.POST['as_of']
 
-        cursor.execute("SELECT * FROM secure_role_details WHERE intake_form_id = %s", [intake_form_id])
-        secure_role_details = cursor.fetchone()
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO secure_role_details (intake_form_id, secenv, secure_application, secure_role, secure_role_approvers, as_of)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, [intake_form_id, secenv, secure_application, secure_role, secure_role_approvers, as_of])
 
-        cursor.execute("SELECT * FROM role_modification_log WHERE intake_form_id = %s", [intake_form_id])
-        role_modification_log = cursor.fetchone()
-
-        cursor.execute("SELECT * FROM data_req WHERE intake_form_id = %s", [intake_form_id])
-        data_req = cursor.fetchone()
-
-        cursor.execute("SELECT * FROM host_req WHERE intake_form_id = %s", [intake_form_id])
-        host_req = cursor.fetchone()
-
-        cursor.execute("SELECT * FROM group_req WHERE intake_form_id = %s", [intake_form_id])
-        group_req = cursor.fetchone()
+        # Handle form submissions for "Save & Next"
+        if 'save_next' in request.POST:
+            return redirect('role_modification_form', intake_form_id=intake_form_id)
 
     context = {
-        'intake_form_id':intake_form_id,
-        'form': form,
-        'application_details': application_details,
-        'secure_role_details': secure_role_details,
-        'role_modification_log': role_modification_log,
-        'data_req': data_req,
-        'host_req': host_req,
-        'group_req': group_req
+        'secure_role_entries': secure_role_entries,
+        'intake_form_id': intake_form_id,
     }
-    return render(request, 'intake/preview_form.html', context)
+    return render(request, 'intake/secure_role_form.html', context)
 
 @login_required
-def submit_form(request, intake_form_id):
-    with connection.cursor() as cursor:
-        cursor.execute("UPDATE intake_form SET status = 'Submitted' WHERE id = %s", [intake_form_id])
-    return redirect('dashboard')
-
-
-# Uncomment this function
-# def view_forms(request):
-#     user_id = request.user.id
-#     with connection.cursor() as cursor:
-#         cursor.execute("SELECT * FROM intake_form WHERE creator_id = %s OR status = 'In Progress'", [user_id])
-#         forms = cursor.fetchall()
-#     return render(request, 'intake/view_forms.html', {'forms': forms})
-
-
-
-def home(request):
-    return render(request,'home.html')
-
-
-def download_form(request, intake_form_id):
-    # Query to fetch data from application_details_form
-    query_application_details = """
-    SELECT * FROM application_details
-    WHERE intake_form_id = %s
-    """
-    
-    # Query to fetch data from secure_role_form
-    query_secure_role = """
-    SELECT * FROM secure_role_details
-    WHERE intake_form_id = %s
-    """
-    
-    # Query to fetch data from role_modification_form
-    query_role_modification = """
-    SELECT * FROM role_modification_log
-    WHERE intake_form_id = %s
-    """
-    
-    # Query to fetch data from data_req_form
-    query_data_req = """
-    SELECT * FROM data_req
-    WHERE intake_form_id = %s
-    """
-    
-    # Query to fetch data from host_req_form
-    query_host_req = """
-    SELECT * FROM host_req
-    WHERE intake_form_id = %s
-    """
-    
-    # Query to fetch data from group_req_form
-    query_group_req = """
-    SELECT * FROM group_req
-    WHERE intake_form_id = %s
-    """
-
-    with connection.cursor() as cursor:
-        # Fetch data from all 6 tables
-        cursor.execute(query_application_details, [intake_form_id])
-        application_details_data = cursor.fetchone()
-
-        cursor.execute(query_secure_role, [intake_form_id])
-        secure_role_data = cursor.fetchone()
-
-        cursor.execute(query_role_modification, [intake_form_id])
-        role_modification_data = cursor.fetchone()
-
-        cursor.execute(query_data_req, [intake_form_id])
-        data_req_data = cursor.fetchone()
-
-        cursor.execute(query_host_req, [intake_form_id])
-        host_req_data = cursor.fetchone()
-
-        cursor.execute(query_group_req, [intake_form_id])
-        group_req_data = cursor.fetchone()
-
-    # Check if any of the forms return None (if they don't exist)
-    if not application_details_data:
-        return HttpResponse("Application details form not found.", status=404)
-
-    # Create a Word document
-    doc = Document()
-    doc.add_heading('Form Data', 0)
-
-    # Adding application details form data to the document
-    doc.add_heading('Application Details Form', level=1)
-    doc.add_paragraph(f"Form ID: {application_details_data[0]}")
-    doc.add_paragraph(f"List of Applications: {application_details_data[1]}")
-    doc.add_paragraph(f"Application ID: {application_details_data[2]}")
-    # doc.add_paragraph(f"Application Name: {application_details_data[3]}")
-    # doc.add_paragraph(f"Owner: {application_details_data[4]}")
-    # doc.add_paragraph(f"Creation Date: {application_details_data[5]}")
-
-    # Adding secure role form data
-    if secure_role_data:
-        doc.add_heading('Secure Role Form', level=1)
-        doc.add_paragraph(f"Role Name: {secure_role_data[1]}")
-        doc.add_paragraph(f"Role Type: {secure_role_data[2]}")
-        doc.add_paragraph(f"Access Level: {secure_role_data[3]}")
-
-    # Adding role modification form data
-    if role_modification_data:
-        doc.add_heading('Role Modification Form', level=1)
-        doc.add_paragraph(f"Role ID: {role_modification_data[1]}")
-        doc.add_paragraph(f"Role Status: {role_modification_data[2]}")
-        doc.add_paragraph(f"Requested By: {role_modification_data[3]}")
-
-    # Adding data request form data
-    if data_req_data:
-        doc.add_heading('Data Request Form', level=1)
-        doc.add_paragraph(f"Data Request ID: {data_req_data[1]}")
-        doc.add_paragraph(f"Data Type: {data_req_data[2]}")
-        doc.add_paragraph(f"Purpose: {data_req_data[3]}")
-
-    # Adding host request form data
-    if host_req_data:
-        doc.add_heading('Host Request Form', level=1)
-        doc.add_paragraph(f"Host Name: {host_req_data[1]}")
-        doc.add_paragraph(f"Environment: {host_req_data[2]}")
-        doc.add_paragraph(f"IP Address: {host_req_data[3]}")
-
-    # Adding group request form data
-    if group_req_data:
-        doc.add_heading('Group Request Form', level=1)
-        doc.add_paragraph(f"Group Name: {group_req_data[1]}")
-        doc.add_paragraph(f"Group Type: {group_req_data[2]}")
-        doc.add_paragraph(f"Group Owner: {group_req_data[3]}")
-
-    # Prepare the document for download
-    buffer = io.BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-
-    response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = f'attachment; filename=Intake_Form_{intake_form_id}.docx'
-
-    return response
-
-
-# def download_form(request, intake_form_id):
-#     # SQL query to fetch form data
-#     query = """
-#     SELECT * FROM intake_form
-#     WHERE id = %s
-#     """
-    
-#     with connection.cursor() as cursor:
-#         cursor.execute(query, [intake_form_id])
-#         form_data = cursor.fetchone()
-    
-#     if not form_data:
-#         return HttpResponse("Form not found.", status=404)
-
-#     # Create a Word document
-#     doc = Document()
-#     doc.add_heading('Intake Form', 0)
-
-#     # Assuming the form_data has the required fields in the correct order
-#     doc.add_paragraph(f"Form ID: {form_data[0]}")
-#     doc.add_paragraph(f"List of Applications: {form_data[1]}")
-#     doc.add_paragraph(f"Application ID: {form_data[2]}")
-#     # Add other fields similarly
-
-#     # Prepare the document for download
-#     buffer = io.BytesIO()
-#     doc.save(buffer)
-#     buffer.seek(0)
-
-#     response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-#     response['Content-Disposition'] = f'attachment; filename=Intake_Form_{intake_form_id}.docx'
-
-#     return response
-
-
-
-# Broken functions below
-
-# def view_forms(request):
-#     user_id = request.user.id
-#     with connection.cursor() as cursor:
-#         cursor.execute("SELECT * FROM intake_form WHERE creator_id = %s OR status = 'In Progress'", [user_id])
-#         forms = cursor.fetchall()
-#     return render(request, 'intake/view_forms.html', {'forms': forms})
-
-
-
-
-@login_required
-def view_forms(request):
-    user_id = request.user.id
-    # is_new_user = request.user.is_new_user
-
-    # if is_new_user:
-    #     query = '''
-    #         SELECT * FROM intake_form
-    #     '''
-
-    # else:
-    query = '''
-        SELECT * FROM intake_form WHERE creator_id=%s
-    '''
-
-    with connection.cursor() as cursor:
-        
-        cursor.execute(query,[user_id])
-
-        form_records = cursor.fetchall()
-
-        # Fetch all matching rows
-
-        # Pass the forms data and is_new_user flag to template
-
-        return render(request,'intake/view_forms.html',{'forms':form_records})
-
-
-@login_required
-def update_form_status(request,intake_form_id):
-
-    user_id = request.user.id
-
-    query = '''
-        UPDATE intake_form SET status = 'Pending Approval' WHERE id = %s AND creator_id = %s
-    '''
-
-    with connection.cursor() as cursor:
-        cursor.execute(query,[intake_form_id,user_id])
-
-
-    return redirect('view_forms')
-
-
-
-@login_required
-def update_form_status_approved(request,intake_form_id):
-
-    user_id = request.user.id
-
-    query = '''
-        UPDATE intake_form SET status = 'Approved' WHERE id = %s AND creator_id = %s
-    '''
-
-    with connection.cursor() as cursor:
-        cursor.execute(query,[intake_form_id,user_id])
-
-
-    return redirect('view_forms')
-
-
-def update_form_status_mail(request,intake_form_id):
-
-    user_id = request.user.id
-
-    query = '''
-        UPDATE intake_form SET status = 'Mail Sent' WHERE id = %s AND creator_id = %s
-    '''
-
-    with connection.cursor() as cursor:
-        cursor.execute(query,[intake_form_id,user_id])
-
-
-    return redirect('view_forms')
-
-
-
-
-def add_secure_role(request):
+def edit_secure_role(request, entry_id, intake_form_id):
     if request.method == 'POST':
-        secenv = request.POST.get('secenv')
-        secure_application = request.POST.get('secure_application')
-        secure_role = request.POST.get('secure_role')
-        secure_role_approvers = request.POST.get('secure_role_approvers')
-        as_of = request.POST.get('as_of')
-
-
-        add_query = """
-            INSERT INTO secure_role_details (intake_form_id,secenv, secure_application, secure_role, secure_role_approvers, as_of)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """
+        secenv = request.POST['secenv']
+        secure_application = request.POST['secure_application']
+        secure_role = request.POST['secure_role']
+        secure_role_approvers = request.POST['secure_role_approvers']
+        as_of = request.POST['as_of']
 
         with connection.cursor() as cursor:
-            cursor.execute(add_query,[intake_form_id,secenv, secure_application, secure_role, secure_role_approvers, as_of])
+            cursor.execute("""
+                UPDATE secure_role_details SET secenv=%s, secure_application=%s, secure_role=%s, secure_role_approvers=%s, as_of=%s
+                WHERE id=%s
+            """, [secenv, secure_application, secure_role, secure_role_approvers, as_of, entry_id])
 
-        return redirect('preview_form',intake_form_id=intake_form_id)
+        return redirect('secure_role_form', intake_form_id=intake_form_id)
 
-    return redirect('preview_form')
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT secenv, secure_application, secure_role, secure_role_approvers, as_of FROM secure_role_details WHERE id = %s", [entry_id])
+        secure_role_data = cursor.fetchone()
+
+    return render(request, 'intake/edit_secure_role.html', {'secure_role_data': secure_role_data, 'intake_form_id': intake_form_id})
+
+@login_required
+def delete_secure_role(request, entry_id, intake_form_id):
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM secure_role_details WHERE id = %s", [entry_id])
+    return redirect('secure_role_form', intake_form_id=intake_form_id)
+
+# Role Modification Log Form
+@login_required
+def role_modification_form(request, intake_form_id):
+    # Fetch all role modification log entries
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, request_number, change_description, security_administrator_assigned, requesting_team_director_approval FROM role_modification_log WHERE intake_form_id = %s", [intake_form_id])
+        role_mod_entries = cursor.fetchall()
+
+    if request.method == 'POST':
+        if 'add_role_modification' in request.POST:
+            request_number = request.POST['request_number']
+            change_description = request.POST['change_description']
+            security_administrator_assigned = request.POST['security_administrator_assigned']
+            requesting_team_director_approval = request.POST['requesting_team_director_approval']
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO role_modification_log (intake_form_id, request_number, change_description, security_administrator_assigned, requesting_team_director_approval)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, [intake_form_id, request_number, change_description, security_administrator_assigned, requesting_team_director_approval])
+
+        if 'save_next' in request.POST:
+            return redirect('data_req_form', intake_form_id=intake_form_id)
+
+    context = {
+        'role_mod_entries': role_mod_entries,
+        'intake_form_id': intake_form_id,
+    }
+    return render(request, 'intake/role_modification_form.html', context)
+
+@login_required
+def edit_role_modification(request, entry_id, intake_form_id):
+    if request.method == 'POST':
+        request_number = request.POST['request_number']
+        change_description = request.POST['change_description']
+        security_administrator_assigned = request.POST['security_administrator_assigned']
+        requesting_team_director_approval = request.POST['requesting_team_director_approval']
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE role_modification_log SET request_number=%s, change_description=%s, security_administrator_assigned=%s, requesting_team_director_approval=%s
+                WHERE id=%s
+            """, [request_number, change_description, security_administrator_assigned, requesting_team_director_approval, entry_id])
+
+        return redirect('role_modification_form', intake_form_id=intake_form_id)
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT request_number, change_description, security_administrator_assigned, requesting_team_director_approval FROM role_modification_log WHERE id = %s", [entry_id])
+        role_mod_data = cursor.fetchone()
+
+    return render(request, 'intake/edit_role_modification.html', {'role_mod_data': role_mod_data, 'intake_form_id': intake_form_id})
+
+@login_required
+def delete_role_modification(request, entry_id, intake_form_id):
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM role_modification_log WHERE id = %s", [entry_id])
+    return redirect('role_modification_form', intake_form_id=intake_form_id)
+
+# Data Requirements Form
+@login_required
+def data_req_form(request, intake_form_id):
+    # Fetch all data requirements entries
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, database_name, environment, access_rights, business_justification FROM data_req WHERE intake_form_id = %s", [intake_form_id])
+        data_req_entries = cursor.fetchall()
+
+    if request.method == 'POST':
+        if 'add_data_req' in request.POST:
+            database_name = request.POST['database_name']
+            environment = request.POST['environment']
+            access_rights = request.POST['access_rights']
+            business_justification = request.POST['business_justification']
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO data_req (intake_form_id, database_name, environment, access_rights, business_justification)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, [intake_form_id, database_name, environment, access_rights, business_justification])
+
+        if 'save_next' in request.POST:
+            return redirect('host_req_form', intake_form_id=intake_form_id)
+
+    context = {
+        'data_req_entries': data_req_entries,
+        'intake_form_id': intake_form_id,
+    }
+    return render(request, 'intake/data_req_form.html', context)
+
+@login_required
+def edit_data_req(request, entry_id, intake_form_id):
+    if request.method == 'POST':
+        database_name = request.POST['database_name']
+        environment = request.POST['environment']
+        access_rights = request.POST['access_rights']
+        business_justification = request.POST['business_justification']
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE data_req SET database_name=%s, environment=%s, access_rights=%s, business_justification=%s
+                WHERE id=%s
+            """, [database_name, environment, access_rights, business_justification, entry_id])
+
+        return redirect('data_req_form', intake_form_id=intake_form_id)
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT database_name, environment, access_rights, business_justification FROM data_req WHERE id = %s", [entry_id])
+        data_req_data = cursor.fetchone()
+
+    return render(request, 'intake/edit_data_req.html', {'data_req_data': data_req_data, 'intake_form_id': intake_form_id})
+
+@login_required
+def delete_data_req(request, entry_id, intake_form_id):
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM data_req WHERE id = %s", [entry_id])
+    return redirect('data_req_form', intake_form_id=intake_form_id)
+
+# Host Requirements Form
+@login_required
+def host_req_form(request, intake_form_id):
+    # Fetch all host requirements entries
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, host, env, level_of_access, business_justification FROM host_req WHERE intake_form_id = %s", [intake_form_id])
+        host_req_entries = cursor.fetchall()
+
+    if request.method == 'POST':
+        if 'add_host_req' in request.POST:
+            host = request.POST['host']
+            env = request.POST['env']
+            level_of_access = request.POST['level_of_access']
+            business_justification = request.POST['business_justification']
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO host_req (intake_form_id, host, env, level_of_access, business_justification)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, [intake_form_id, host, env, level_of_access, business_justification])
+
+        if 'save_next' in request.POST:
+            return redirect('group_req_form', intake_form_id=intake_form_id)
+
+    context = {
+        'host_req_entries': host_req_entries,
+        'intake_form_id': intake_form_id,
+    }
+    return render(request, 'intake/host_req_form.html', context)
+
+@login_required
+def edit_host_req(request, entry_id, intake_form_id):
+    if request.method == 'POST':
+        host = request.POST['host']
+        env = request.POST['env']
+        level_of_access = request.POST['level_of_access']
+        business_justification = request.POST['business_justification']
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE host_req SET host=%s, env=%s, level_of_access=%s, business_justification=%s
+                WHERE id=%s
+            """, [host, env, level_of_access, business_justification, entry_id])
+
+        return redirect('host_req_form', intake_form_id=intake_form_id)
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT host, env, level_of_access, business_justification FROM host_req WHERE id = %s", [entry_id])
+        host_req_data = cursor.fetchone()
+
+    return render(request, 'intake/edit_host_req.html', {'host_req_data': host_req_data, 'intake_form_id': intake_form_id})
+
+@login_required
+def delete_host_req(request, entry_id, intake_form_id):
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM host_req WHERE id = %s", [entry_id])
+    return redirect('host_req_form', intake_form_id=intake_form_id)
+
+# Group Requirements Form
+@login_required
+def group_req_form(request, intake_form_id):
+    # Fetch all group requirements entries
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, group_name, group_type, description, business_justification FROM group_req WHERE intake_form_id = %s", [intake_form_id])
+        group_req_entries = cursor.fetchall()
+
+    if request.method == 'POST':
+        if 'add_group_req' in request.POST:
+            group_name = request.POST['group_name']
+            group_type = request.POST['group_type']
+            description = request.POST['description']
+            business_justification = request.POST['business_justification']
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO group_req (intake_form_id, group_name, group_type, description, business_justification)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, [intake_form_id, group_name, group_type, description, business_justification])
+
+        if 'save_next' in request.POST:
+            return redirect('preview_form', intake_form_id=intake_form_id)
+
+    context = {
+        'group_req_entries': group_req_entries,
+        'intake_form_id': intake_form_id,
+    }
+    return render(request, 'intake/group_req_form.html', context)
+
+@login_required
+def edit_group_req(request, entry_id, intake_form_id):
+    if request.method == 'POST':
+        group_name = request.POST['group_name']
+        group_type = request.POST['group_type']
+        description = request.POST['description']
+        business_justification = request.POST['business_justification']
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE group_req SET group_name=%s, group_type=%s, description=%s, business_justification=%s
+                WHERE id=%s
+            """, [group_name, group_type, description, business_justification, entry_id])
+
+        return redirect('group_req_form', intake_form_id=intake_form_id)
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT group_name, group_type, description, business_justification FROM group_req WHERE id = %s", [entry_id])
+        group_req_data = cursor.fetchone()
+
+    return render(request, 'intake/edit_group_req.html', {'group_req_data': group_req_data, 'intake_form_id': intake_form_id})
+
+@login_required
+def delete_group_req(request, entry_id, intake_form_id):
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM group_req WHERE id = %s", [entry_id])
+    return redirect('group_req_form', intake_form_id=intake_form_id)
