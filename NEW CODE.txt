@@ -1,120 +1,417 @@
+1. edit_group_req.html:
+html
+Copy code
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Form - OPTUM</title>
+    <title>Edit Group Requirements</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
+            background-color: #f4f4f4;
             margin: 0;
             padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
         }
         .container {
-            background-color: #1f1f1f;
-            padding: 30px;
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-            width: 400px;
-        }
-        .round-buttons {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .round-buttons a {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            background-color: #007bff;
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 40px;
-            margin: 5px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .round-buttons a:hover {
-            background-color: #0056b3;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         h3 {
             text-align: center;
             margin-bottom: 20px;
-            color: #ffffff;
+            font-size: 24px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
         }
         input, textarea {
             width: 100%;
             padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #444;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
             border-radius: 5px;
-            background-color: #2c2c2c;
-            color: #ffffff;
         }
-        button {
-            width: 100%;
-            padding: 10px;
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        a {
-            color: #007bff;
             text-decoration: none;
-            display: block;
-            text-align: center;
-            margin-top: 15px;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <div class="round-buttons">
-            <a href="#1">1</a>
-            <a href="#2">2</a>
-            <a href="#3">3</a>
-            <a href="#4">4</a>
-            <a href="#5">5</a>
-            <a href="#6">6</a>
-        </div>
-        <h3>Application Details Form</h3>
-
-        
-        <form method="post">
+        <h3>Edit Group Requirements</h3>
+        <form method="POST">
             {% csrf_token %}
-                        
-            <div>
-                <label for="application_name">Application Name:</label>
-                <input type="text" name="application_name" id="application_name" value="{{ application_details_data.0 }}" required>
-            </div>
-            <div>
-                <label for="ask_id">Ask ID:</label>
-                <input type="text" name="ask_id" id="ask_id" value="{{ application_details_data.1 }}" required>
-            </div>
-            <div>
-                <label for="functional_role">Functional Role:</label>
-                <input type="text" name="functional_role" id="functional_role" value="{{ application_details_data.2 }}" required>
-            </div>
-            <!-- <button type="submit">Save</button><br><br> -->
-            <button type="submit">Save and Preview</button><br><br>
-            
-            
+            <label for="group_name">Group Name:</label>
+            <input type="text" name="group_name" id="group_name" value="{{ group_req_data.1 }}" required>
+
+            <label for="group_type">Group Type:</label>
+            <input type="text" name="group_type" id="group_type" value="{{ group_req_data.2 }}" required>
+
+            <label for="description">Description:</label>
+            <textarea name="description" id="description" required>{{ group_req_data.3 }}</textarea>
+
+            <label for="business_justification">Business Justification:</label>
+            <textarea name="business_justification" id="business_justification" required>{{ group_req_data.4 }}</textarea>
+
+            <button type="submit" class="btn">Save</button>
+            <a href="{% url 'preview_form' intake_form_id %}" class="btn">Cancel</a>
         </form>
-        <a href="{% url 'dashboard' %}">Dashboard</a>
-        
     </div>
 </body>
 </html>
+2. edit_host_req.html:
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Host Requirements</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
 
+<body>
+    <div class="container">
+        <h3>Edit Host Requirements</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <label for="host">Host:</label>
+            <input type="text" name="host" id="host" value="{{ host_req_data.1 }}" required>
 
+            <label for="env">Environment:</label>
+            <input type="text" name="env" id="env" value="{{ host_req_data.2 }}" required>
+
+            <label for="level_of_access">Level of Access:</label>
+            <input type="text" name="level_of_access" id="level_of_access" value="{{ host_req_data.3 }}" required>
+
+            <label for="business_justification">Business Justification:</label>
+            <textarea name="business_justification" id="business_justification" required>{{ host_req_data.4 }}</textarea>
+
+            <button type="submit" class="btn">Save</button>
+            <a href="{% url 'preview_form' intake_form_id %}" class="btn">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>
+3. edit_role_modification.html:
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Role Modification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h3>Edit Role Modification</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <label for="request_number">Request Number:</label>
+            <input type="text" name="request_number" id="request_number" value="{{ role_modification_data.1 }}" required>
+
+            <label for="change_description">Change Description:</label>
+            <textarea name="change_description" id="change_description" required>{{ role_modification_data.2 }}</textarea>
+
+            <label for="security_administrator_assigned">Security Administrator Assigned:</label>
+            <input type="text" name="security_administrator_assigned" id="security_administrator_assigned" value="{{ role_modification_data.3 }}" required>
+
+            <label for="requesting_team_director_approval">Team Director Approval:</label>
+            <input type="text" name="requesting_team_director_approval" id="requesting_team_director_approval" value="{{ role_modification_data.4 }}" required>
+
+            <label for="data_governance_approval">Data Governance Approval:</label>
+            <input type="text" name="data_governance_approval" id="data_governance_approval" value="{{ role_modification_data.5 }}" required>
+
+            <label for="requesting_team_application_team_approval">App Team Approval:</label>
+            <input type="text" name="requesting_team_application_team_approval" id="requesting_team_application_team_approval" value="{{ role_modification_data.6 }}" required>
+
+            <label for="dba_approval">DBA Approval:</label>
+            <input type="text" name="dba_approval" id="dba_approval" value="{{ role_modification_data.7 }}" required>
+
+            <button type="submit" class="btn">Save</button>
+            <a href="{% url 'preview_form' intake_form_id %}" class="btn">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>
+4. edit_data_req.html:
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Data Requirements</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h3>Edit Data Requirements</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <label for="database_name">Database Name:</label>
+            <input type="text" name="database_name" id="database_name" value="{{ data_req_data.1 }}" required>
+
+            <label for="environment">Environment:</label>
+            <input type="text" name="environment" id="environment" value="{{ data_req_data.2 }}" required>
+
+            <label for="access_rights">Access Rights:</label>
+            <input type="text" name="access_rights" id="access_rights" value="{{ data_req_data.3 }}" required>
+
+            <label for="business_justification">Business Justification:</label>
+            <textarea name="business_justification" id="business_justification" required>{{ data_req_data.4 }}</textarea>
+
+            <button type="submit" class="btn">Save</button>
+            <a href="{% url 'preview_form' intake_form_id %}" class="btn">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>
+5. edit_secure_role.html:
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Secure Role</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h3>Edit Secure Role</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <label for="secenv">Secure Environment:</label>
+            <input type="text" name="secenv" id="secenv" value="{{ secure_role_data.1 }}" required>
+
+            <label for="secure_application">Secure Application:</label>
+            <input type="text" name="secure_application" id="secure_application" value="{{ secure_role_data.2 }}" required>
+
+            <label for="secure_role">Secure Role:</label>
+            <input type="text" name="secure_role" id="secure_role" value="{{ secure_role_data.3 }}" required>
+
+            <label for="secure_role_approvers">Secure Role Approvers:</label>
+            <input type="text" name="secure_role_approvers" id="secure_role_approvers" value="{{ secure_role_data.4 }}" required>
+
+            <label for="as_of">As Of:</label>
+            <input type="date" name="as_of" id="as_of" value="{{ secure_role_data.5 }}" required>
+
+            <button type="submit" class="btn">Save</button>
+            <a href="{% url 'preview_form' intake_form_id %}" class="btn">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>
