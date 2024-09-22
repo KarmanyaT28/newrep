@@ -1,43 +1,65 @@
-data_req_form.html
-html
-Copy code
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Requirements Form</title>
+    <title>Create Form - OPTUM</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f7fc;
+            background-color: #121212;
+            color: #ffffff;
             margin: 0;
             padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
+            background-color: #1f1f1f;
+            padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            width: 400px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .round-buttons {
+            text-align: center;
             margin-bottom: 20px;
         }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        th {
+        .round-buttons a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
             background-color: #007bff;
             color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            margin: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .round-buttons a:hover {
+            background-color: #0056b3;
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #2c2c2c;
+            color: #ffffff;
         }
         button {
-            padding: 10px 15px;
+            width: 100%;
+            padding: 10px;
             background-color: #007bff;
             color: white;
             border: none;
@@ -47,341 +69,629 @@ Copy code
         button:hover {
             background-color: #0056b3;
         }
-        .navigation-buttons {
-            margin-top: 20px;
+        a {
+            color: #007bff;
+            text-decoration: none;
+            display: block;
             text-align: center;
-        }
-        .navigation-buttons button {
-            margin-right: 10px;
-        }
-        h2 {
-            color: #333;
-            margin-bottom: 10px;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Data Requirements</h2>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Database Name</th>
-                    <th>Environment</th>
-                    <th>Access Rights</th>
-                    <th>Business Justification</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for entry in data_req_entries %}
-                <tr>
-                    <td>{{ entry.database_name }}</td>
-                    <td>{{ entry.environment }}</td>
-                    <td>{{ entry.access_rights }}</td>
-                    <td>{{ entry.business_justification }}</td>
-                    <td>
-                        <a href="{% url 'edit_data_req' entry.id intake_form_id %}">Edit</a> |
-                        <a href="{% url 'delete_data_req' entry.id intake_form_id %}">Delete</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <h2>Add New Data Requirement</h2>
-        <form method="POST" action="{% url 'data_req_form' intake_form_id %}">
-            {% csrf_token %}
-            <label for="database_name">Database Name</label><br>
-            <input type="text" name="database_name" placeholder="Database Name" required><br>
-
-            <label for="environment">Environment</label><br>
-            <input type="text" name="environment" placeholder="Environment" required><br>
-
-            <label for="access_rights">Access Rights</label><br>
-            <input type="text" name="access_rights" placeholder="Access Rights" required><br>
-
-            <label for="business_justification">Business Justification</label><br>
-            <input type="text" name="business_justification" placeholder="Business Justification" required><br><br>
-
-            <button type="submit" name="add_data_req">Add</button>
-            <button type="submit" name="save">Save</button>
-            <button type="submit" name="save_next">Save & Next</button>
-        </form>
-
-        <div class="navigation-buttons">
-            <button onclick="navigateToForm(1)">1</button>
-            <button onclick="navigateToForm(2)">2</button>
-            <button onclick="navigateToForm(3)">3</button>
-            <button onclick="navigateToForm(4)">4</button>
-            <button onclick="navigateToForm(5)">5</button>
-            <button onclick="navigateToForm(6)">6</button>
+        <div class="round-buttons">
+            <a href="#1">1</a>
+            <a href="#2">2</a>
+            <a href="#3">3</a>
+            <a href="#4">4</a>
+            <a href="#5">5</a>
+            <a href="#6">6</a>
         </div>
-    </div>
+        <h3>Application Details Form</h3>
 
-    <script>
-        function navigateToForm(formNumber) {
-            window.location.href = `/form/${formNumber}`;
-        }
-    </script>
+        
+        <form method="post">
+            {% csrf_token %}
+                        
+            <div>
+                <label for="application_name">Application Name:</label>
+                <input type="text" name="application_name" id="application_name" value="{{ application_details_data.0 }}" required>
+            </div>
+            <div>
+                <label for="ask_id">Ask ID:</label>
+                <input type="text" name="ask_id" id="ask_id" value="{{ application_details_data.1 }}" required>
+            </div>
+            <div>
+                <label for="functional_role">Functional Role:</label>
+                <input type="text" name="functional_role" id="functional_role" value="{{ application_details_data.2 }}" required>
+            </div>
+            <!-- <button type="submit">Save</button><br><br> -->
+            <button type="submit">Save and Preview</button><br><br>
+            
+            
+        </form>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        
+    </div>
 </body>
 </html>
-4. host_req_form.html
-html
-Copy code
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Host Requirements Form</title>
+    <title>Preview Form - OPTUM</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7fc;
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #062241;
             margin: 0;
             padding: 20px;
         }
         .container {
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
             background-color: white;
-            padding: 20px;
+            padding: 40px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #d3d3d3;
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: underline;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-top: 20px;
+            margin-bottom: 40px;
         }
         th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
+            padding: 12px;
+            border: 1px solid #999;
             text-align: left;
         }
         th {
             background-color: #007bff;
             color: white;
+            font-weight: bold;
         }
-        button {
-            padding: 10px 15px;
-            background-color: #007bff;
+        td {
+            background-color: #f9f9f9;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #28a745;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            text-decoration: none;
+            margin: 5px;
         }
-        button:hover {
-            background-color: #0056b3;
+        .btn:hover {
+            background-color: #218838;
         }
-        .navigation-buttons {
+        a {
+            color: black;
+            text-decoration: none;
+        }
+
+        /* .add-entry-form {
             margin-top: 20px;
-            text-align: center;
-        }
-        .navigation-buttons button {
-            margin-right: 10px;
-        }
-        h2 {
-            color: #333;
-            margin-bottom: 10px;
-        }
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: ;
+        } */
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Host Requirements</h2>
-
+        <h2>DMO Functional Role Intake Form</h2>
+        <h3>INTAKE FORM</h3>
         <table>
-            <thead>
-                <tr>
-                    <th>Host</th>
-                    <th>Environment</th>
-                    <th>Level of Access</th>
-                    <th>Business Justification</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for entry in host_req_entries %}
-                <tr>
-                    <td>{{ entry.host }}</td>
-                    <td>{{ entry.env }}</td>
-                    <td>{{ entry.level_of_access }}</td>
-                    <td>{{ entry.business_justification }}</td>
-                    <td>
-                        <a href="{% url 'edit_host_req' entry.id intake_form_id %}">Edit</a> |
-                        <a href="{% url 'delete_host_req' entry.id intake_form_id %}">Delete</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
+            <tr>
+                <th>Title</th>
+                <td>{{ form.1 }}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{ form.3 }}</td>
+            </tr>
+        </table>
+            <br><br>
+
+            <h3><a href="{% url 'application_details_form' form.0 %}">APPLICATION DETAILS</a></h3>
+        <table>
+            <tr>
+                <th>Application Name</th>
+                <td>{{ application_details.2 }}</td>
+            </tr>
+            <tr>
+                <th>Ask ID</th>
+                <td>{{ application_details.3 }}</td>
+            </tr>
+            <tr>
+                <th>Functional Role</th>
+                <td>{{ application_details.4 }}</td>
+            </tr>
         </table>
 
-        <h2>Add New Host Requirement</h2>
-        <form method="POST" action="{% url 'host_req_form' intake_form_id %}">
-            {% csrf_token %}
-            <label for="host">Host</label><br>
-            <input type="text" name="host" placeholder="Host" required><br>
+        <!-- Secure Role Section (Horizontal Fields) -->
+        <br><br>
+        <h3><a href="{% url 'secure_role_form' form.0 %}">SECURE ROLE DETAILS</a></h3>
+        <table>
+            <tr>
+                <th>Secure Environment</th>
+                <th>Secure Application</th>
+                <th>Secure Role</th>
+                <th>Secure Role Approvers</th>
+                <th>As Of</th>
+            </tr>
+            <tr>
+                <td><a href="{% url 'secure_role_form' form.0 %}">{{ secure_role_details.2 }}</a></td>
+                <td>{{ secure_role_details.3 }}</td>
+                <td>{{ secure_role_details.4 }}</td>
+                <td>{{ secure_role_details.5 }}</td>
+                <td>{{ secure_role_details.6 }}</td>
+            </tr>
+        </table>
 
-            <label for="env">Environment</label><br>
-            <input type="text" name="env" placeholder="Environment" required><br>
+        <br><br>
+        <h3><a href="{% url 'role_modification_form' form.0 %}">ROLE MODIFICATION LOG</a></h3>
+        <table>
+            <tr>
+                <th>Request Number</th>
+                <th>Change Description</th>
+                <th>Security Administrator</th>
+                <th>Team Director Approval</th>
+                <th>Data Governance Approval</th>
+                <th>App Team Approval</th>
+                <th>DBA Approval</th>
+            </tr>
+            <tr>
+                <td><a href="{% url 'role_modification_form' form.0 %}">{{ role_modification_log.2 }}</a></td>
+                <td>{{ role_modification_log.3 }}</td>
+                <td>{{ role_modification_log.4 }}</td>
+                <td>{{ role_modification_log.5 }}</td>
+                <td>{{ role_modification_log.6 }}</td>
+                <td>{{ role_modification_log.7 }}</td>
+                <td>{{ role_modification_log.8 }}</td>
+            </tr>
+        </table>
 
-            <label for="level_of_access">Level of Access</label><br>
-            <input type="text" name="level_of_access" placeholder="Level of Access" required><br>
+        <br><br>
+        <h4>Role Members: {{ application_details.2 }} project team members working on projects for {{ application_details.2 }} following Agile methodology. <br><br>
 
-            <label for="business_justification">Business Justification</label><br>
-            <input type="text" name="business_justification" placeholder="Business Justification" required><br><br>
+            Description of your request: This role is for all {{ application_details.2 }} project team members that can perform BA and/or SE and/or QA tasks while following the Agile project methodology on project for the {{ application_details.2 }}.<br><br>
+            
+            Is there an end date for the data access?  No<br><br>
+            
+            Will the role allow access to the following data? If yes, provide justification.  Application support team requiring access to all data within the database to support functionality.<br><br>
+            Sensitive or protected data: Yes<br><br>
+            
+            Social security numbers (SSN, HICN): Yes<br><br>
+            
+            UnitedHealth Group Employee data: Yes<br><br>
+            
+            Who has overall responsibility for entitlement reviews of this access? Secure<br><br>
+            
+            
+            Detail<br><br>
+            
+            Use the following tables to represent your complete requirements.  If you are modifying an existing role, please indicate your current access as well as what needs to be add/changed/removed.  <br><br>
+            The details need to represent everything required.<br><br>
+            </h4>
+        <h3><a href="{% url 'data_req_form' form.0 %}">DATA REQUIREMENTS</a></h3>
 
-            <button type="submit" name="add_host_req">Add</button>
-            <button type="submit" name="save">Save</button>
-            <button type="submit" name="save_next">Save & Next</button>
-        </form>
+        <!-- Data Request Section (Horizontal Fields) -->
+        <table>
+            <tr>
+                <th>Database Name</th>
+                <th>Environment</th>
+                <th>Access Rights</th>
+                <th>Business Justification</th>
+            </tr>
+            <tr>
+                <td><a href="{% url 'data_req_form' form.0 %}">{{ data_req.2 }}</a></td>
+                <td>{{ data_req.3 }}</td>
+                <td>{{ data_req.4 }}</td>
+                <td>{{ data_req.5 }}</td>
+            </tr>
+        </table>
 
-        <div class="navigation-buttons">
-            <button onclick="navigateToForm(1)">1</button>
-            <button onclick="navigateToForm(2)">2</button>
-            <button onclick="navigateToForm(3)">3</button>
-            <button onclick="navigateToForm(4)">4</button>
-            <button onclick="navigateToForm(5)">5</button>
-            <button onclick="navigateToForm(6)">6</button>
-        </div>
+
+        <br><br>
+        <h3><a href="{% url 'host_req_form' form.0 %}">HOST REQUIREMENTS</a></h3>
+
+        <!-- Host Request Section (Horizontal Fields) -->
+        <table>
+            <tr>
+                <th>Host</th>
+                <th>Environment</th>
+                <th>Level of Access</th>
+                <th>Business Justification</th>
+            </tr>
+            <tr>
+                <td><a href="{% url 'host_req_form' form.0 %}">{{ host_req.2 }}</a></td>
+                <td>{{ host_req.3 }}</td>
+                <td>{{ host_req.4 }}</td>
+                <td>{{ host_req.5 }}</td>
+            </tr>
+        </table>
+
+        <br><br>
+        <h3><a href="{% url 'group_req_form' form.0 %}">GROUP REQUIREMENTS</a></h3>
+
+        <!-- Group Request Section (Horizontal Fields) -->
+        <table>
+            <tr>
+                <th>Group Name</th>
+                <th>Group Type</th>
+                <th>Description</th>
+                <th>Business Justification</th>
+            </tr>
+            <tr>
+                <td><a href="{% url 'group_req_form' form.0 %}">{{ group_req.2 }}</a></td>
+                <td>{{ group_req.3 }}</td>
+                <td>{{ group_req.4 }}</td>
+                <td>{{ group_req.5 }}</td>
+            </tr>
+        </table>
+
+        <!-- Buttons -->
+        <a class="btn" href="{% url 'dashboard' %}">Dashboard</a>
+        <a class="btn" href="{% url 'download_form' intake_form_id %}">Download PDF</a>
+
     </div>
-
-    <script>
-        function navigateToForm(formNumber) {
-            window.location.href = `/form/${formNumber}`;
-        }
-    </script>
 </body>
 </html>
-5. group_req_form.html
-html
-Copy code
+
+
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group Requirements Form</title>
+    <title>Dashboard</title>
     <style>
+        /* Global Styles */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7fc;
+            background-color: #f2f4f6;
+            color: #ecf0f1;
+            font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
+
+        /* Navbar Styles */
+        .navbar {
+            background-color: #062241;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar-brand {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .navbar-brand:hover {
+            color: #0ca0df;
+        }
+
+        .navbar-nav {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-link {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #0ca0df;
+        }
+
+        /* Container Styles */
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
+            margin: 2rem auto;
+            max-width: 1200px;
+            padding: 2rem;
+            background-color: #062241;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .navigation-buttons {
-            margin-top: 20px;
+
+        h1 {
             text-align: center;
+            color: #0ca0df;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
         }
-        .navigation-buttons button {
-            margin-right: 10px;
+
+        /* Card Styles */
+        .card {
+            background-color: #eff2f5;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
-        h2 {
-            color: #333;
-            margin-bottom: 10px;
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .card h2 {
+            color: #0ca0df;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        /* List Group Styles */
+        .list-group {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .list-group-item {
+            padding: 0.75rem 1rem;
+            background-color: #007bff;
+            border: 1px solid #0c0d0d;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.3s;
+        }
+
+        .list-group-item:hover {
+            background-color: #007bff;
+        }
+
+        .list-group-item a {
+            color: #f0f3f4;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .list-group-item a:hover {
+            color: #0ca0df;
+        }
+
+        .badge {
+            background-color: #7f8c8d;
+            color: #ecf0f1;
+            padding: 0.25rem 0.75rem;
+            border-radius: 5px;
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            gap: 1rem;
+        }
+
+        .nav-buttons button {
+            background-color: #0ca0df;
+            color: #52daa1;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .nav-buttons button:hover {
+            background-color: #0ca0df;
+            transform: scale(1.05);
+        }
+
+        .nav-buttons button:active {
+            background-color: #0ca0df;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .navbar-nav {
+                flex-direction: column;
+            }
+
+            .navbar-nav .nav-item {
+                margin-bottom: 0.5rem;
+            }
         }
     </style>
 </head>
+
 <body>
+    <nav class="navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">Application Security Administration</a>
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'create_intake_form' %}">Create</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'view_forms' %}">Manage Forms</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register' %}">Register</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
     <div class="container">
-        <h2>Group Requirements</h2>
+        <!-- <h1>Dashboard</h1> -->
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Group Name</th>
-                    <th>Group Type</th>
-                    <th>Description</th>
-                    <th>Business Justification</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for entry in group_req_entries %}
-                <tr>
-                    <td>{{ entry.group_name }}</td>
-                    <td>{{ entry.group_type }}</td>
-                    <td>{{ entry.description }}</td>
-                    <td>{{ entry.business_justification }}</td>
-                    <td>
-                        <a href="{% url 'edit_group_req' entry.id intake_form_id %}">Edit</a> |
-                        <a href="{% url 'delete_group_req' entry.id intake_form_id %}">Delete</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <!-- Navigation between forms -->
+       
 
-        <h2>Add New Group Requirement</h2>
-        <form method="POST" action="{% url 'group_req_form' intake_form_id %}">
-            {% csrf_token %}
-            <label for="group_name">Group Name</label><br>
-            <input type="text" name="group_name" placeholder="Group Name" required><br>
+        <div class="row">
+            <div class="col-lg-4 mb-3">
+                <div class="card">
+                    <h2>Forms In Progress</h2>
+                    <ul class="list-group">
+                        {% for form in in_progress_forms %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{% url 'preview_form' form.0 %}">{{ form.1 }}</a> by {{ form.2 }} on {{ form.3 }}
+                            <a href="{% url 'application_details_form' form.0 %}">Continue/Edit</a>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No forms in progress</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
 
-            <label for="group_type">Group Type</label><br>
-            <input type="text" name="group_type" placeholder="Group Type" required><br>
+            <div class="col-lg-4 mb-3">
+                <div class="card">
+                    <h2>Submitted Forms</h2>
+                    <ul class="list-group">
+                        {% for form in submitted_forms %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{% url 'preview_form' form.0 %}">{{ form.1 }}</a>
+                            <span class="badge">{{ form.2 }} - {{ form.3 }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No submitted forms</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
 
-            <label for="description">Description</label><br>
-            <input type="text" name="description" placeholder="Description" required><br>
+            <div class="col-lg-4 mb-3">
+                <div class="card">
+                    <h2>Pending Approvals</h2>
+                    <ul class="list-group">
+                        {% for form in pending_approval_forms %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{% url 'preview_form' form.0 %}">{{ form.1 }}</a>
+                            <span class="badge">{{ form.2 }} - {{ form.3 }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No forms pending approval</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
 
-            <label for="business_justification">Business Justification</label><br>
-            <input type="text" name="business_justification" placeholder="Business Justification" required><br><br>
+            <div class="col-lg-4 mb-3">
+                <div class="card">
+                    <h2>Approved</h2>
+                    <ul class="list-group">
+                        {% for form in approved_forms %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{% url 'preview_form' form.0 %}">{{ form.1 }}</a>
+                            <span class="badge">{{ form.2 }} - {{ form.3 }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No forms approved</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
 
-            <button type="submit" name="add_group_req">Add</button>
-            <button type="submit" name="save">Save</button>
-            <button type="submit" name="save_next">Save & Next</button>
-        </form>
-
-        <div class="navigation-buttons">
-            <button onclick="navigateToForm(1)">1</button>
-            <button onclick="navigateToForm(2)">2</button>
-            <button onclick="navigateToForm(3)">3</button>
-            <button onclick="navigateToForm(4)">4</button>
-            <button onclick="navigateToForm(5)">5</button>
-            <button onclick="navigateToForm(6)">6</button>
+            <div class="col-lg-4 mb-3">
+                <div class="card">
+                    <h2>Completed Forms</h2>
+                    <ul class="list-group">
+                        {% for form in completed_forms %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{% url 'preview_form' form.0 %}">{{ form.1 }}</a>
+                            <span class="badge">{{ form.2 }} - {{ form.3 }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No completed forms</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
-
-    <script>
-        function navigateToForm(formNumber) {
-            window.location.href = `/form/${formNumber}`;
-        }
-    </script>
 </body>
+
 </html>
+
+
+
+@login_required
+def preview_form(request, intake_form_id):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM intake_form WHERE id = %s", [intake_form_id])
+        form = cursor.fetchone()
+
+        cursor.execute("SELECT * FROM application_details WHERE intake_form_id = %s", [intake_form_id])
+        application_details = cursor.fetchone()
+
+        cursor.execute("SELECT * FROM secure_role_details WHERE intake_form_id = %s", [intake_form_id])
+        secure_role_details = cursor.fetchone()
+
+        cursor.execute("SELECT * FROM role_modification_log WHERE intake_form_id = %s", [intake_form_id])
+        role_modification_log = cursor.fetchone()
+
+        cursor.execute("SELECT * FROM data_req WHERE intake_form_id = %s", [intake_form_id])
+        data_req = cursor.fetchone()
+
+        cursor.execute("SELECT * FROM host_req WHERE intake_form_id = %s", [intake_form_id])
+        host_req = cursor.fetchone()
+
+        cursor.execute("SELECT * FROM group_req WHERE intake_form_id = %s", [intake_form_id])
+        group_req = cursor.fetchone()
+
+    context = {
+        'intake_form_id':intake_form_id,
+        'form': form,
+        'application_details': application_details,
+        'secure_role_details': secure_role_details,
+        'role_modification_log': role_modification_log,
+        'data_req': data_req,
+        'host_req': host_req,
+        'group_req': group_req
+    }
+    return render(request, 'intake/preview_form.html', context)
