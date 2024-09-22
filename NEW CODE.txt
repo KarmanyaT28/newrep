@@ -1,29 +1,263 @@
-from django.urls import path
-from . import views
+1. secure_role_form.html
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Role Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .navigation-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .navigation-buttons button {
+            margin-right: 10px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Secure Role Details</h2>
 
-urlpatterns = [
-    # Secure Role Form URLs
-    path('form/<int:intake_form_id>/secure_role/', views.secure_role_form, name='secure_role_form'),
-    path('form/<int:intake_form_id>/edit_secure_role/<int:entry_id>/', views.edit_secure_role, name='edit_secure_role'),
-    path('form/<int:intake_form_id>/delete_secure_role/<int:entry_id>/', views.delete_secure_role, name='delete_secure_role'),
+        <table>
+            <thead>
+                <tr>
+                    <th>SecEnv</th>
+                    <th>Secure Application</th>
+                    <th>Secure Role</th>
+                    <th>Secure Role Approvers</th>
+                    <th>As Of</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in secure_role_entries %}
+                <tr>
+                    <td>{{ entry.secenv }}</td>
+                    <td>{{ entry.secure_application }}</td>
+                    <td>{{ entry.secure_role }}</td>
+                    <td>{{ entry.secure_role_approvers }}</td>
+                    <td>{{ entry.as_of }}</td>
+                    <td>
+                        <a href="{% url 'edit_secure_role' entry.id intake_form_id %}">Edit</a> |
+                        <a href="{% url 'delete_secure_role' entry.id intake_form_id %}">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-    # Role Modification Form URLs
-    path('form/<int:intake_form_id>/role_modification/', views.role_modification_form, name='role_modification_form'),
-    path('form/<int:intake_form_id>/edit_role_modification/<int:entry_id>/', views.edit_role_modification, name='edit_role_modification'),
-    path('form/<int:intake_form_id>/delete_role_modification/<int:entry_id>/', views.delete_role_modification, name='delete_role_modification'),
+        <h2>Add New Secure Role</h2>
+        <form method="POST" action="{% url 'secure_role_form' intake_form_id %}">
+            {% csrf_token %}
+            <label for="secenv">SecEnv</label><br>
+            <input type="text" name="secenv" placeholder="SecEnv" required><br>
 
-    # Data Requirements Form URLs
-    path('form/<int:intake_form_id>/data_req/', views.data_req_form, name='data_req_form'),
-    path('form/<int:intake_form_id>/edit_data_req/<int:entry_id>/', views.edit_data_req, name='edit_data_req'),
-    path('form/<int:intake_form_id>/delete_data_req/<int:entry_id>/', views.delete_data_req, name='delete_data_req'),
+            <label for="secure_application">Secure Application</label><br>
+            <input type="text" name="secure_application" placeholder="Secure Application" required><br>
 
-    # Host Requirements Form URLs
-    path('form/<int:intake_form_id>/host_req/', views.host_req_form, name='host_req_form'),
-    path('form/<int:intake_form_id>/edit_host_req/<int:entry_id>/', views.edit_host_req, name='edit_host_req'),
-    path('form/<int:intake_form_id>/delete_host_req/<int:entry_id>/', views.delete_host_req, name='delete_host_req'),
+            <label for="secure_role">Secure Role</label><br>
+            <input type="text" name="secure_role" placeholder="Secure Role" required><br>
 
-    # Group Requirements Form URLs
-    path('form/<int:intake_form_id>/group_req/', views.group_req_form, name='group_req_form'),
-    path('form/<int:intake_form_id>/edit_group_req/<int:entry_id>/', views.edit_group_req, name='edit_group_req'),
-    path('form/<int:intake_form_id>/delete_group_req/<int:entry_id>/', views.delete_group_req, name='delete_group_req'),
-]
+            <label for="secure_role_approvers">Secure Role Approvers</label><br>
+            <input type="text" name="secure_role_approvers" placeholder="Secure Role Approvers" required><br>
+
+            <label for="as_of">As Of</label><br>
+            <input type="date" name="as_of" required><br><br>
+
+            <button type="submit" name="add_secure_role">Add</button>
+            <button type="submit" name="save">Save</button>
+            <button type="submit" name="save_next">Save & Next</button>
+        </form>
+
+        <div class="navigation-buttons">
+            <button onclick="navigateToForm(1)">1</button>
+            <button onclick="navigateToForm(2)">2</button>
+            <button onclick="navigateToForm(3)">3</button>
+            <button onclick="navigateToForm(4)">4</button>
+            <button onclick="navigateToForm(5)">5</button>
+            <button onclick="navigateToForm(6)">6</button>
+        </div>
+    </div>
+
+    <script>
+        function navigateToForm(formNumber) {
+            window.location.href = `/form/${formNumber}`;
+        }
+    </script>
+</body>
+</html>
+2. role_modification_form.html
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role Modification Log</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .navigation-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .navigation-buttons button {
+            margin-right: 10px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Role Modification Log</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Request Number</th>
+                    <th>Change Description</th>
+                    <th>Security Administrator Assigned</th>
+                    <th>Requesting Team Director Approval</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in role_mod_entries %}
+                <tr>
+                    <td>{{ entry.request_number }}</td>
+                    <td>{{ entry.change_description }}</td>
+                    <td>{{ entry.security_administrator_assigned }}</td>
+                    <td>{{ entry.requesting_team_director_approval }}</td>
+                    <td>
+                        <a href="{% url 'edit_role_modification' entry.id intake_form_id %}">Edit</a> |
+                        <a href="{% url 'delete_role_modification' entry.id intake_form_id %}">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Add New Role Modification</h2>
+        <form method="POST" action="{% url 'role_modification_form' intake_form_id %}">
+            {% csrf_token %}
+            <label for="request_number">Request Number</label><br>
+            <input type="text" name="request_number" placeholder="Request Number" required><br>
+
+            <label for="change_description">Change Description</label><br>
+            <input type="text" name="change_description" placeholder="Change Description" required><br>
+
+            <label for="security_administrator_assigned">Security Administrator Assigned</label><br>
+            <input type="text" name="security_administrator_assigned" placeholder="Security Administrator Assigned" required><br>
+
+            <label for="requesting_team_director_approval">Requesting Team Director Approval</label><br>
+            <input type="text" name="requesting_team_director_approval" placeholder="Requesting Team Director Approval" required><br><br>
+
+            <button type="submit" name="add_role_modification">Add</button>
+            <button type="submit" name="save">Save</button>
+            <button type="submit" name="save_next">Save & Next</button>
+        </form>
+
+        <div class="navigation-buttons">
+            <button onclick="navigateToForm(1)">1</button>
+            <button onclick="navigateToForm(2)">2</button>
+            <button onclick="navigateToForm(3)">3</button>
+            <button onclick="navigateToForm(4)">4</button>
+            <button onclick="navigateToForm(5)">5</button>
+            <button onclick="navigateToForm(6)">6</button>
+        </div>
+    </div>
+
+    <script>
+        function navigateToForm(formNumber) {
+            window.location.href = `/form/${formNumber}`;
+        }
+    </script>
+</body>
+</html>
