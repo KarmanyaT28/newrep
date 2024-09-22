@@ -1,4 +1,4 @@
-1. secure_role_form.html
+data_req_form.html
 html
 Copy code
 <!DOCTYPE html>
@@ -6,7 +6,7 @@ Copy code
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Role Form</title>
+    <title>Data Requirements Form</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -62,55 +62,50 @@ Copy code
 </head>
 <body>
     <div class="container">
-        <h2>Secure Role Details</h2>
+        <h2>Data Requirements</h2>
 
         <table>
             <thead>
                 <tr>
-                    <th>SecEnv</th>
-                    <th>Secure Application</th>
-                    <th>Secure Role</th>
-                    <th>Secure Role Approvers</th>
-                    <th>As Of</th>
+                    <th>Database Name</th>
+                    <th>Environment</th>
+                    <th>Access Rights</th>
+                    <th>Business Justification</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for entry in secure_role_entries %}
+                {% for entry in data_req_entries %}
                 <tr>
-                    <td>{{ entry.secenv }}</td>
-                    <td>{{ entry.secure_application }}</td>
-                    <td>{{ entry.secure_role }}</td>
-                    <td>{{ entry.secure_role_approvers }}</td>
-                    <td>{{ entry.as_of }}</td>
+                    <td>{{ entry.database_name }}</td>
+                    <td>{{ entry.environment }}</td>
+                    <td>{{ entry.access_rights }}</td>
+                    <td>{{ entry.business_justification }}</td>
                     <td>
-                        <a href="{% url 'edit_secure_role' entry.id intake_form_id %}">Edit</a> |
-                        <a href="{% url 'delete_secure_role' entry.id intake_form_id %}">Delete</a>
+                        <a href="{% url 'edit_data_req' entry.id intake_form_id %}">Edit</a> |
+                        <a href="{% url 'delete_data_req' entry.id intake_form_id %}">Delete</a>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <h2>Add New Secure Role</h2>
-        <form method="POST" action="{% url 'secure_role_form' intake_form_id %}">
+        <h2>Add New Data Requirement</h2>
+        <form method="POST" action="{% url 'data_req_form' intake_form_id %}">
             {% csrf_token %}
-            <label for="secenv">SecEnv</label><br>
-            <input type="text" name="secenv" placeholder="SecEnv" required><br>
+            <label for="database_name">Database Name</label><br>
+            <input type="text" name="database_name" placeholder="Database Name" required><br>
 
-            <label for="secure_application">Secure Application</label><br>
-            <input type="text" name="secure_application" placeholder="Secure Application" required><br>
+            <label for="environment">Environment</label><br>
+            <input type="text" name="environment" placeholder="Environment" required><br>
 
-            <label for="secure_role">Secure Role</label><br>
-            <input type="text" name="secure_role" placeholder="Secure Role" required><br>
+            <label for="access_rights">Access Rights</label><br>
+            <input type="text" name="access_rights" placeholder="Access Rights" required><br>
 
-            <label for="secure_role_approvers">Secure Role Approvers</label><br>
-            <input type="text" name="secure_role_approvers" placeholder="Secure Role Approvers" required><br>
+            <label for="business_justification">Business Justification</label><br>
+            <input type="text" name="business_justification" placeholder="Business Justification" required><br><br>
 
-            <label for="as_of">As Of</label><br>
-            <input type="date" name="as_of" required><br><br>
-
-            <button type="submit" name="add_secure_role">Add</button>
+            <button type="submit" name="add_data_req">Add</button>
             <button type="submit" name="save">Save</button>
             <button type="submit" name="save_next">Save & Next</button>
         </form>
@@ -132,7 +127,7 @@ Copy code
     </script>
 </body>
 </html>
-2. role_modification_form.html
+4. host_req_form.html
 html
 Copy code
 <!DOCTYPE html>
@@ -140,7 +135,7 @@ Copy code
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Role Modification Log</title>
+    <title>Host Requirements Form</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -196,50 +191,179 @@ Copy code
 </head>
 <body>
     <div class="container">
-        <h2>Role Modification Log</h2>
+        <h2>Host Requirements</h2>
 
         <table>
             <thead>
                 <tr>
-                    <th>Request Number</th>
-                    <th>Change Description</th>
-                    <th>Security Administrator Assigned</th>
-                    <th>Requesting Team Director Approval</th>
+                    <th>Host</th>
+                    <th>Environment</th>
+                    <th>Level of Access</th>
+                    <th>Business Justification</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for entry in role_mod_entries %}
+                {% for entry in host_req_entries %}
                 <tr>
-                    <td>{{ entry.request_number }}</td>
-                    <td>{{ entry.change_description }}</td>
-                    <td>{{ entry.security_administrator_assigned }}</td>
-                    <td>{{ entry.requesting_team_director_approval }}</td>
+                    <td>{{ entry.host }}</td>
+                    <td>{{ entry.env }}</td>
+                    <td>{{ entry.level_of_access }}</td>
+                    <td>{{ entry.business_justification }}</td>
                     <td>
-                        <a href="{% url 'edit_role_modification' entry.id intake_form_id %}">Edit</a> |
-                        <a href="{% url 'delete_role_modification' entry.id intake_form_id %}">Delete</a>
+                        <a href="{% url 'edit_host_req' entry.id intake_form_id %}">Edit</a> |
+                        <a href="{% url 'delete_host_req' entry.id intake_form_id %}">Delete</a>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <h2>Add New Role Modification</h2>
-        <form method="POST" action="{% url 'role_modification_form' intake_form_id %}">
+        <h2>Add New Host Requirement</h2>
+        <form method="POST" action="{% url 'host_req_form' intake_form_id %}">
             {% csrf_token %}
-            <label for="request_number">Request Number</label><br>
-            <input type="text" name="request_number" placeholder="Request Number" required><br>
+            <label for="host">Host</label><br>
+            <input type="text" name="host" placeholder="Host" required><br>
 
-            <label for="change_description">Change Description</label><br>
-            <input type="text" name="change_description" placeholder="Change Description" required><br>
+            <label for="env">Environment</label><br>
+            <input type="text" name="env" placeholder="Environment" required><br>
 
-            <label for="security_administrator_assigned">Security Administrator Assigned</label><br>
-            <input type="text" name="security_administrator_assigned" placeholder="Security Administrator Assigned" required><br>
+            <label for="level_of_access">Level of Access</label><br>
+            <input type="text" name="level_of_access" placeholder="Level of Access" required><br>
 
-            <label for="requesting_team_director_approval">Requesting Team Director Approval</label><br>
-            <input type="text" name="requesting_team_director_approval" placeholder="Requesting Team Director Approval" required><br><br>
+            <label for="business_justification">Business Justification</label><br>
+            <input type="text" name="business_justification" placeholder="Business Justification" required><br><br>
 
-            <button type="submit" name="add_role_modification">Add</button>
+            <button type="submit" name="add_host_req">Add</button>
+            <button type="submit" name="save">Save</button>
+            <button type="submit" name="save_next">Save & Next</button>
+        </form>
+
+        <div class="navigation-buttons">
+            <button onclick="navigateToForm(1)">1</button>
+            <button onclick="navigateToForm(2)">2</button>
+            <button onclick="navigateToForm(3)">3</button>
+            <button onclick="navigateToForm(4)">4</button>
+            <button onclick="navigateToForm(5)">5</button>
+            <button onclick="navigateToForm(6)">6</button>
+        </div>
+    </div>
+
+    <script>
+        function navigateToForm(formNumber) {
+            window.location.href = `/form/${formNumber}`;
+        }
+    </script>
+</body>
+</html>
+5. group_req_form.html
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Requirements Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .navigation-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .navigation-buttons button {
+            margin-right: 10px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Group Requirements</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Group Name</th>
+                    <th>Group Type</th>
+                    <th>Description</th>
+                    <th>Business Justification</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in group_req_entries %}
+                <tr>
+                    <td>{{ entry.group_name }}</td>
+                    <td>{{ entry.group_type }}</td>
+                    <td>{{ entry.description }}</td>
+                    <td>{{ entry.business_justification }}</td>
+                    <td>
+                        <a href="{% url 'edit_group_req' entry.id intake_form_id %}">Edit</a> |
+                        <a href="{% url 'delete_group_req' entry.id intake_form_id %}">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Add New Group Requirement</h2>
+        <form method="POST" action="{% url 'group_req_form' intake_form_id %}">
+            {% csrf_token %}
+            <label for="group_name">Group Name</label><br>
+            <input type="text" name="group_name" placeholder="Group Name" required><br>
+
+            <label for="group_type">Group Type</label><br>
+            <input type="text" name="group_type" placeholder="Group Type" required><br>
+
+            <label for="description">Description</label><br>
+            <input type="text" name="description" placeholder="Description" required><br>
+
+            <label for="business_justification">Business Justification</label><br>
+            <input type="text" name="business_justification" placeholder="Business Justification" required><br><br>
+
+            <button type="submit" name="add_group_req">Add</button>
             <button type="submit" name="save">Save</button>
             <button type="submit" name="save_next">Save & Next</button>
         </form>
