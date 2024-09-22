@@ -39,6 +39,7 @@
             margin: 5px;
             text-decoration: none;
             font-weight: bold;
+            transition: background-color 0.3s;
         }
         .round-buttons a:hover {
             background-color: #0056b3;
@@ -57,6 +58,9 @@
             background-color: #2c2c2c;
             color: #ffffff;
         }
+        input::placeholder {
+            color: #888;
+        }
         button {
             width: 100%;
             padding: 10px;
@@ -65,6 +69,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
         button:hover {
             background-color: #0056b3;
@@ -75,6 +80,15 @@
             display: block;
             text-align: center;
             margin-top: 15px;
+            transition: color 0.3s;
+        }
+        a:hover {
+            color: #0056b3;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
         }
     </style>
 </head>
@@ -89,33 +103,43 @@
             <a href="#6">6</a>
         </div>
         <h3>Application Details Form</h3>
-
         
         <form method="post">
             {% csrf_token %}
-                        
             <div>
                 <label for="application_name">Application Name:</label>
-                <input type="text" name="application_name" id="application_name" value="{{ application_details_data.0 }}" required>
+                <input type="text" name="application_name" id="application_name" value="{{ application_details_data.0 }}" required placeholder="Enter Application Name">
             </div>
             <div>
                 <label for="ask_id">Ask ID:</label>
-                <input type="text" name="ask_id" id="ask_id" value="{{ application_details_data.1 }}" required>
+                <input type="text" name="ask_id" id="ask_id" value="{{ application_details_data.1 }}" required placeholder="Enter Ask ID">
             </div>
             <div>
                 <label for="functional_role">Functional Role:</label>
-                <input type="text" name="functional_role" id="functional_role" value="{{ application_details_data.2 }}" required>
+                <input type="text" name="functional_role" id="functional_role" value="{{ application_details_data.2 }}" required placeholder="Enter Functional Role">
             </div>
-            <!-- <button type="submit">Save</button><br><br> -->
-            <button type="submit">Save and Preview</button><br><br>
-            
-            
+            <button type="submit">Save and Preview</button>
         </form>
-        <a href="{% url 'dashboard' %}">Dashboard</a>
-        
+
+        <a href="{% url 'dashboard' %}">Return to Dashboard</a>
     </div>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 <!DOCTYPE html>
@@ -140,14 +164,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border: 1px solid #d3d3d3;
         }
-        h3 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 24px;
-            font-weight: bold;
-            text-decoration: underline;
-        }
-        h2 {
+        h3, h2 {
             text-align: center;
             margin-bottom: 20px;
             font-size: 24px;
@@ -191,13 +208,6 @@
             color: black;
             text-decoration: none;
         }
-
-        /* .add-entry-form {
-            margin-top: 20px;
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: ;
-        } */
     </style>
 </head>
 <body>
@@ -214,9 +224,9 @@
                 <td>{{ form.3 }}</td>
             </tr>
         </table>
-            <br><br>
 
-            <h3><a href="{% url 'application_details_form' form.0 %}">APPLICATION DETAILS</a></h3>
+        <!-- Application Details -->
+        <h3><a href="{% url 'application_details_form' form.0 %}">APPLICATION DETAILS</a></h3>
         <table>
             <tr>
                 <th>Application Name</th>
@@ -232,126 +242,137 @@
             </tr>
         </table>
 
-        <!-- Secure Role Section (Horizontal Fields) -->
-        <br><br>
+        <!-- Secure Role Section (Display all entries) -->
         <h3><a href="{% url 'secure_role_form' form.0 %}">SECURE ROLE DETAILS</a></h3>
         <table>
-            <tr>
-                <th>Secure Environment</th>
-                <th>Secure Application</th>
-                <th>Secure Role</th>
-                <th>Secure Role Approvers</th>
-                <th>As Of</th>
-            </tr>
-            <tr>
-                <td><a href="{% url 'secure_role_form' form.0 %}">{{ secure_role_details.2 }}</a></td>
-                <td>{{ secure_role_details.3 }}</td>
-                <td>{{ secure_role_details.4 }}</td>
-                <td>{{ secure_role_details.5 }}</td>
-                <td>{{ secure_role_details.6 }}</td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Secure Environment</th>
+                    <th>Secure Application</th>
+                    <th>Secure Role</th>
+                    <th>Secure Role Approvers</th>
+                    <th>As Of</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in secure_role_details %}
+                <tr>
+                    <td>{{ entry.secenv }}</td>
+                    <td>{{ entry.secure_application }}</td>
+                    <td>{{ entry.secure_role }}</td>
+                    <td>{{ entry.secure_role_approvers }}</td>
+                    <td>{{ entry.as_of }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">No secure role details available.</td></tr>
+                {% endfor %}
+            </tbody>
         </table>
 
-        <br><br>
+        <!-- Role Modification Log (Display all entries) -->
         <h3><a href="{% url 'role_modification_form' form.0 %}">ROLE MODIFICATION LOG</a></h3>
         <table>
-            <tr>
-                <th>Request Number</th>
-                <th>Change Description</th>
-                <th>Security Administrator</th>
-                <th>Team Director Approval</th>
-                <th>Data Governance Approval</th>
-                <th>App Team Approval</th>
-                <th>DBA Approval</th>
-            </tr>
-            <tr>
-                <td><a href="{% url 'role_modification_form' form.0 %}">{{ role_modification_log.2 }}</a></td>
-                <td>{{ role_modification_log.3 }}</td>
-                <td>{{ role_modification_log.4 }}</td>
-                <td>{{ role_modification_log.5 }}</td>
-                <td>{{ role_modification_log.6 }}</td>
-                <td>{{ role_modification_log.7 }}</td>
-                <td>{{ role_modification_log.8 }}</td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Request Number</th>
+                    <th>Change Description</th>
+                    <th>Security Administrator</th>
+                    <th>Team Director Approval</th>
+                    <th>Data Governance Approval</th>
+                    <th>App Team Approval</th>
+                    <th>DBA Approval</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in role_modification_log %}
+                <tr>
+                    <td>{{ entry.request_number }}</td>
+                    <td>{{ entry.change_description }}</td>
+                    <td>{{ entry.security_administrator_assigned }}</td>
+                    <td>{{ entry.requesting_team_director_approval }}</td>
+                    <td>{{ entry.data_governance_approval }}</td>
+                    <td>{{ entry.requesting_team_application_team_approval }}</td>
+                    <td>{{ entry.dba_approval }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7">No role modification log available.</td></tr>
+                {% endfor %}
+            </tbody>
         </table>
 
-        <br><br>
-        <h4>Role Members: {{ application_details.2 }} project team members working on projects for {{ application_details.2 }} following Agile methodology. <br><br>
-
-            Description of your request: This role is for all {{ application_details.2 }} project team members that can perform BA and/or SE and/or QA tasks while following the Agile project methodology on project for the {{ application_details.2 }}.<br><br>
-            
-            Is there an end date for the data access?  No<br><br>
-            
-            Will the role allow access to the following data? If yes, provide justification.  Application support team requiring access to all data within the database to support functionality.<br><br>
-            Sensitive or protected data: Yes<br><br>
-            
-            Social security numbers (SSN, HICN): Yes<br><br>
-            
-            UnitedHealth Group Employee data: Yes<br><br>
-            
-            Who has overall responsibility for entitlement reviews of this access? Secure<br><br>
-            
-            
-            Detail<br><br>
-            
-            Use the following tables to represent your complete requirements.  If you are modifying an existing role, please indicate your current access as well as what needs to be add/changed/removed.  <br><br>
-            The details need to represent everything required.<br><br>
-            </h4>
+        <!-- Data Requirements (Display all entries) -->
         <h3><a href="{% url 'data_req_form' form.0 %}">DATA REQUIREMENTS</a></h3>
-
-        <!-- Data Request Section (Horizontal Fields) -->
         <table>
-            <tr>
-                <th>Database Name</th>
-                <th>Environment</th>
-                <th>Access Rights</th>
-                <th>Business Justification</th>
-            </tr>
-            <tr>
-                <td><a href="{% url 'data_req_form' form.0 %}">{{ data_req.2 }}</a></td>
-                <td>{{ data_req.3 }}</td>
-                <td>{{ data_req.4 }}</td>
-                <td>{{ data_req.5 }}</td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Database Name</th>
+                    <th>Environment</th>
+                    <th>Access Rights</th>
+                    <th>Business Justification</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in data_req %}
+                <tr>
+                    <td>{{ entry.database_name }}</td>
+                    <td>{{ entry.environment }}</td>
+                    <td>{{ entry.access_rights }}</td>
+                    <td>{{ entry.business_justification }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">No data requirements available.</td></tr>
+                {% endfor %}
+            </tbody>
         </table>
 
-
-        <br><br>
+        <!-- Host Requirements (Display all entries) -->
         <h3><a href="{% url 'host_req_form' form.0 %}">HOST REQUIREMENTS</a></h3>
-
-        <!-- Host Request Section (Horizontal Fields) -->
         <table>
-            <tr>
-                <th>Host</th>
-                <th>Environment</th>
-                <th>Level of Access</th>
-                <th>Business Justification</th>
-            </tr>
-            <tr>
-                <td><a href="{% url 'host_req_form' form.0 %}">{{ host_req.2 }}</a></td>
-                <td>{{ host_req.3 }}</td>
-                <td>{{ host_req.4 }}</td>
-                <td>{{ host_req.5 }}</td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Host</th>
+                    <th>Environment</th>
+                    <th>Level of Access</th>
+                    <th>Business Justification</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in host_req %}
+                <tr>
+                    <td>{{ entry.host }}</td>
+                    <td>{{ entry.env }}</td>
+                    <td>{{ entry.level_of_access }}</td>
+                    <td>{{ entry.business_justification }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">No host requirements available.</td></tr>
+                {% endfor %}
+            </tbody>
         </table>
 
-        <br><br>
+        <!-- Group Requirements (Display all entries) -->
         <h3><a href="{% url 'group_req_form' form.0 %}">GROUP REQUIREMENTS</a></h3>
-
-        <!-- Group Request Section (Horizontal Fields) -->
         <table>
-            <tr>
-                <th>Group Name</th>
-                <th>Group Type</th>
-                <th>Description</th>
-                <th>Business Justification</th>
-            </tr>
-            <tr>
-                <td><a href="{% url 'group_req_form' form.0 %}">{{ group_req.2 }}</a></td>
-                <td>{{ group_req.3 }}</td>
-                <td>{{ group_req.4 }}</td>
-                <td>{{ group_req.5 }}</td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Group Name</th>
+                    <th>Group Type</th>
+                    <th>Description</th>
+                    <th>Business Justification</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in group_req %}
+                <tr>
+                    <td>{{ entry.group_name }}</td>
+                    <td>{{ entry.group_type }}</td>
+                    <td>{{ entry.description }}</td>
+                    <td>{{ entry.business_justification }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">No group requirements available.</td></tr>
+                {% endfor %}
+            </tbody>
         </table>
 
         <!-- Buttons -->
@@ -361,6 +382,7 @@
     </div>
 </body>
 </html>
+
 
 
 
@@ -386,6 +408,9 @@
             background-color: #062241;
             padding: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .navbar-brand {
@@ -474,7 +499,7 @@
         }
 
         .list-group-item:hover {
-            background-color: #007bff;
+            background-color: #0056b3;
         }
 
         .list-group-item a {
@@ -505,7 +530,7 @@
 
         .nav-buttons button {
             background-color: #0ca0df;
-            color: #52daa1;
+            color: #fff;
             border: none;
             padding: 0.75rem 1.5rem;
             font-size: 1rem;
@@ -515,12 +540,12 @@
         }
 
         .nav-buttons button:hover {
-            background-color: #0ca0df;
+            background-color: #007bb5;
             transform: scale(1.05);
         }
 
         .nav-buttons button:active {
-            background-color: #0ca0df;
+            background-color: #005b8d;
         }
 
         /* Responsive Styles */
@@ -567,12 +592,10 @@
     </nav>
 
     <div class="container">
-        <!-- <h1>Dashboard</h1> -->
-
-        <!-- Navigation between forms -->
-       
+        <h1>Dashboard</h1>
 
         <div class="row">
+            <!-- Forms In Progress Section -->
             <div class="col-lg-4 mb-3">
                 <div class="card">
                     <h2>Forms In Progress</h2>
@@ -589,6 +612,7 @@
                 </div>
             </div>
 
+            <!-- Submitted Forms Section -->
             <div class="col-lg-4 mb-3">
                 <div class="card">
                     <h2>Submitted Forms</h2>
@@ -605,6 +629,7 @@
                 </div>
             </div>
 
+            <!-- Pending Approval Forms Section -->
             <div class="col-lg-4 mb-3">
                 <div class="card">
                     <h2>Pending Approvals</h2>
@@ -621,6 +646,7 @@
                 </div>
             </div>
 
+            <!-- Approved Forms Section -->
             <div class="col-lg-4 mb-3">
                 <div class="card">
                     <h2>Approved</h2>
@@ -637,6 +663,7 @@
                 </div>
             </div>
 
+            <!-- Completed Forms Section -->
             <div class="col-lg-4 mb-3">
                 <div class="card">
                     <h2>Completed Forms</h2>
@@ -657,41 +684,3 @@
 </body>
 
 </html>
-
-
-
-@login_required
-def preview_form(request, intake_form_id):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM intake_form WHERE id = %s", [intake_form_id])
-        form = cursor.fetchone()
-
-        cursor.execute("SELECT * FROM application_details WHERE intake_form_id = %s", [intake_form_id])
-        application_details = cursor.fetchone()
-
-        cursor.execute("SELECT * FROM secure_role_details WHERE intake_form_id = %s", [intake_form_id])
-        secure_role_details = cursor.fetchone()
-
-        cursor.execute("SELECT * FROM role_modification_log WHERE intake_form_id = %s", [intake_form_id])
-        role_modification_log = cursor.fetchone()
-
-        cursor.execute("SELECT * FROM data_req WHERE intake_form_id = %s", [intake_form_id])
-        data_req = cursor.fetchone()
-
-        cursor.execute("SELECT * FROM host_req WHERE intake_form_id = %s", [intake_form_id])
-        host_req = cursor.fetchone()
-
-        cursor.execute("SELECT * FROM group_req WHERE intake_form_id = %s", [intake_form_id])
-        group_req = cursor.fetchone()
-
-    context = {
-        'intake_form_id':intake_form_id,
-        'form': form,
-        'application_details': application_details,
-        'secure_role_details': secure_role_details,
-        'role_modification_log': role_modification_log,
-        'data_req': data_req,
-        'host_req': host_req,
-        'group_req': group_req
-    }
-    return render(request, 'intake/preview_form.html', context)
