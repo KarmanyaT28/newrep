@@ -1,9 +1,34 @@
+def view_entries(request, app_name):
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    # Fetch all entries for the selected application
+    query = "SELECT * FROM sync_config WHERE app_name = %s"
+    cursor.execute(query, (app_name,))
+    entries = cursor.fetchall()
+
+    return render(request, 'view_entries.html', {
+        'entries': entries,
+        'app_name': app_name
+    })
+
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Entries for {{ app_name }}</title>
+    <title>View Entries for {{ app_name }}</title>
     <style>
         /* Global Settings */
         body {
@@ -48,36 +73,35 @@
             margin-bottom: 40px;
         }
 
-        /* Neomorphism Card Design */
-        .card {
-            background: #2b2b2b;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 20px 20px 60px #1c1c1c, -20px -20px 60px #3a3a3a;
+        .table-container {
             width: 80%;
             margin: 0 auto;
             margin-bottom: 40px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 20px 20px 60px #1c1c1c, -20px -20px 60px #3a3a3a;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            overflow: hidden;
+            color: #ffffff;
         }
 
         th, td {
             padding: 15px;
-            border: none;
-            color: #ffffff;
+            text-align: left;
+            border-bottom: 1px solid #444444;
         }
 
         th {
-            text-align: left;
-            font-weight: bold;
             color: #e2e2e2;
+            font-weight: bold;
+        }
+
+        td {
+            color: #cccccc;
         }
 
         /* Buttons */
@@ -100,158 +124,89 @@
             box-shadow: 0px 10px 15px rgba(76, 175, 80, 0.3);
         }
 
-        input[type="text"], select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #cccccc;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            background-color: #333333;
-            color: white;
-        }
-
-        /* Responsive Design */
-        @media only screen and (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            h1 {
-                font-size: 2.5rem;
-            }
-
-            .card {
-                width: 100%;
-                padding: 30px;
-            }
-
-            input[type="text"], select {
-                font-size: 14px;
-            }
-
-            button {
-                padding: 10px 20px;
-            }
+        .generate-csv {
+            text-align: center;
+            margin-top: 40px;
         }
     </style>
-
-    <script>
-        function validateForm() {
-            const memberId = document.getElementById('member_identifier').value;
-            const memberType = document.getElementById('member_identifier_type').value;
-            const databaseName = document.getElementById('database_name').value;
-            const restrictedIds = document.getElementById('restricted_to_ids').value;
-
-            // If Member Identifier is not empty, Member Identifier Type must be provided
-            if (memberId !== '' && memberType === '') {
-                alert('Please select a Member Identifier Type.');
-                return false;
-            }
-
-            // If Member Identifier Type is a database role, Database Name cannot be empty
-            if ((memberType.includes('db role')) && databaseName === '') {
-                alert('Please provide a Database Name for the selected Database Role.');
-                return false;
-            }
-
-            // If Member Identifier Type is Restricted to IDs, then Restricted to IDs cannot be empty
-            if (memberType === 'restricted to ids' && restrictedIds === '') {
-                alert('Please provide Restricted to IDs.');
-                return false;
-            }
-
-            return true;
-        }
-
-        function toggleFields() {
-            const memberId = document.getElementById('member_identifier').value;
-            const memberType = document.getElementById('member_identifier_type').value;
-
-            // If Member Identifier is filled, show Member Identifier Type dropdown
-            document.getElementById('member_identifier_type').disabled = (memberId === '');
-
-            // If Member Identifier Type is db role, require Database Name
-            if (memberType.includes('db role')) {
-                document.getElementById('database_name').disabled = false;
-                document.getElementById('restricted_to_ids').disabled = true;
-            } else if (memberType === 'restricted to ids') {
-                document.getElementById('database_name').disabled = true;
-                document.getElementById('restricted_to_ids').disabled = false;
-            } else {
-                document.getElementById('database_name').disabled = true;
-                document.getElementById('restricted_to_ids').disabled = true;
-            }
-        }
-    </script>
-
 </head>
-<body onload="toggleFields()">
+<body>
 
     <!-- Navbar -->
     <div class="navbar">
         <a href="/">Dashboard</a>
     </div>
 
-    <h1>Edit Entries for {{ app_name }}</h1>
+    <h1>View Entries for {{ app_name }}</h1>
 
-    <!-- Form to Add New Entries -->
-    <div class="card">
-        <h2>Add New Entry</h2>
-        <form method="POST" onsubmit="return validateForm()">
-            {% csrf_token %}
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Secure Application Name</th>
-                            <th>Application MUI</th>
-                            <th>Secure Environment</th>
-                            <th>Secure Role Name</th>
-                            <th>Member Identifier</th>
-                            <th>Member Identifier Type</th>
-                            <th>Database Name</th>
-                            <th>Batch Role or Support Team Member</th>
-                            <th>Restricted to IDs</th>
-                            <th>Viewpoint Role</th>
-                            <th>Role Complete</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><input type="text" name="Secure_Application_Name" required></td>
-                            <td><input type="text" name="Application_MUI" required></td>
-                            <td><input type="text" name="Secure_Environment" required></td>
-                            <td><input type="text" name="Secure_Role_Name" required></td>
-                            <td><input type="text" id="member_identifier" name="Member_Identifier" oninput="toggleFields()"></td>
-                            <td>
-                                <select id="member_identifier_type" name="Member_Identifier_Type" onchange="toggleFields()" disabled>
-                                    <option value="">-- Select Type --</option>
-                                    <option value="td db role">TD DB Role</option>
-                                    <option value="db2 db role">DB2 DB Role</option>
-                                    <option value="mysql db role">MySQL DB Role</option>
-                                    <option value="restricted to ids">Restricted to IDs</option>
-                                    <option value="azure group">Azure Group</option>
-                                </select>
-                            </td>
-                            <td><input type="text" id="database_name" name="Database_Name" disabled></td>
-                            <td>
-                                <select name="Batch_Role_or_Support_Team_Member">
-                                    <option value="">-- Select Role --</option>
-                                    <option value="Batch Role">Batch Role</option>
-                                    <option value="Support Team Member">Support Team Member</option>
-                                </select>
-                            </td>
-                            <td><input type="text" id="restricted_to_ids" name="Restricted_to_IDs" disabled></td>
-                            <td><input type="text" name="Viewpoint_Role"></td>
-                            <td><input type="text" name="Role_Complete"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    <!-- Table for displaying the entries -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Secure Application Name</th>
+                    <th>Application MUI</th>
+                    <th>Secure Environment</th>
+                    <th>Secure Role Name</th>
+                    <th>Member Identifier</th>
+                    <th>Member Identifier Type</th>
+                    <th>Database Name</th>
+                    <th>Batch Role or Support Team Member</th>
+                    <th>Restricted to IDs</th>
+                    <th>Viewpoint Role</th>
+                    <th>Role Complete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.1 }}</td>
+                    <td>{{ entry.2 }}</td>
+                    <td>{{ entry.3 }}</td>
+                    <td>{{ entry.4 }}</td>
+                    <td>{{ entry.5 }}</td>
+                    <td>{{ entry.6 }}</td>
+                    <td>{{ entry.7 }}</td>
+                    <td>{{ entry.8 }}</td>
+                    <td>{{ entry.9 }}</td>
+                    <td>{{ entry.10 }}</td>
+                    <td>{{ entry.11 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-            <button type="submit">Add Entry</button>
-        </form>
+    <!-- Button to Generate CSV -->
+    <div class="generate-csv">
+        <a href="/generate_csv/{{ app_name }}/" class="btn">Generate CSV</a>
     </div>
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.dashboard, name='dashboard'),
+    path('edit_entries/<str:app_name>/', views.edit_entries, name='edit_entries'),
+    path('generate_csv/<str:app_name>/', views.generate_csv, name='generate_csv'),
+    path('view_entries/<str:app_name>/', views.view_entries, name='view_entries'),  # New view for viewing entries
+]
+
+
+
+
+
+
+
