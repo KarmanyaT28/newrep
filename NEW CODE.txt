@@ -4,5 +4,6 @@ def create_intake_form(request):
         title = request.POST.get('title')
         with connection.cursor() as cursor:
             cursor.execute("INSERT INTO intake_form (title, creator_id, status) VALUES (%s, %s, %s)", [title, request.user.id, 'In Progress'])
-        return redirect('dashboard')
+            intake_form_id = cursor.lastrowid  # Get the last inserted ID for the form
+        return redirect('secure_role_form', intake_form_id=intake_form_id)  # Redirect to secure_role_form
     return render(request, 'intake/create_form.html')
