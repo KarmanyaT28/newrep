@@ -1,1 +1,8 @@
-return redirect(reverse('application_details', kwargs={'intakeformid': intake_form.id}))
+@login_required
+def create_intake_form(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        with connection.cursor() as cursor:
+            cursor.execute("INSERT INTO intake_form (title, creator_id, status) VALUES (%s, %s, %s)", [title, request.user.id, 'In Progress'])
+        return redirect('dashboard')
+    return render(request, 'intake/create_form.html')
