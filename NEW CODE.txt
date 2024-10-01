@@ -1,48 +1,51 @@
-<form action="{% url 'role_access_form' intake_form_id=intake_form_id %}" method="POST">
-    {% csrf_token %}
+def application_details_form(request, intake_form_id):
+    if request.method == 'POST':
+        application_name = request.POST.get('application_name')
+        ask_id = request.POST.get('ask_id')
+        functional_role = request.POST.get('functional_role')
+        title = f"{application_name}|{functional_role}"
 
-    <div>
-        <label for="role_members">Role Members:</label>
-        <textarea id="role_members" name="role_members" rows="4" cols="50" required></textarea>
-    </div>
 
-    <div>
-        <label for="description">Description:</label>
-        <textarea id="description" name="description" rows="4" cols="50" required></textarea>
-    </div>
+        with connection.cursor() as cursor:
+            # Check if a record exists for this intake_form_id
+            cursor.execute('''
+                SELECT COUNT(*) FROM application_details WHERE intake_form_id = %s
+            ''', [intake_form_id])
+            exists = cursor.fetchone()[0]
 
-    <div>
-        <label for="end_date_for_data_access">Is there an end date for data access?</label>
-        <select id="end_date_for_data_access" name="end_date_for_data_access" required>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-        </select>
-    </div>
+            if exists:
+                # Update existing record
+                cursor.execute('''
+                    UPDATE application_details
+                    SET application_name = %s, ask_id = %s, functional_role = %s
+                    WHERE intake_form_id = %s
+                ''', [application_name, ask_id, functional_role, intake_form_id])
+            else:
+                # Insert new record
+                cursor.execute('''
+                    INSERT INTO application_details (intake_form_id,application_name, ask_id, functional_role)
+                    VALUES (%s, %s, %s, %s)
+                ''', [intake_form_id, application_name, ask_id, functional_role])
 
-    <div>
-        <label for="access_sensitive_data">Will the role allow access to sensitive or protected data? If yes, provide justification:</label>
-        <textarea id="access_sensitive_data" name="access_sensitive_data" rows="4" cols="50" required></textarea>
-    </div>
+                cursor.execute("""
+                    UPDATE intake_form SET title = %s WHERE intake_form_id=%s
+                """,[title,intake_form_id])
 
-    <div>
-        <label for="access_social_security_numbers">Will the role allow access to social security numbers?</label>
-        <select id="access_social_security_numbers" name="access_social_security_numbers" required>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-        </select>
-    </div>
+        # return redirect('secure_role_form', intake_form_id=intake_form_id)
+        if 'save_and_next' in request.POST:
+            return redirect('secure_role_form', intake_form_id=intake_form_id)
+        return redirect('application_details_form', intake_form_id=intake_form_id)
+    else:
+        # Fetch the latest data from the database for pre-filling the form
+        with connection.cursor() as cursor:
+            cursor.execute('''
+                SELECT application_name, ask_id, functional_role
+                FROM application_details
+                WHERE intake_form_id = %s
+            ''', [intake_form_id])
+            application_details_data = cursor.fetchone()
 
-    <div>
-        <label for="access_uhg_employee_data">UnitedHealth Group Employee Data Access:</label>
-        <textarea id="access_uhg_employee_data" name="access_uhg_employee_data" rows="4" cols="50" required></textarea>
-    </div>
-
-    <div>
-        <label for="responsibility_for_entitlement_reviews">Who has the overall responsibility for entitlement reviews of this access?</label>
-        <textarea id="responsibility_for_entitlement_reviews" name="responsibility_for_entitlement_reviews" rows="4" cols="50" required></textarea>
-    </div>
-
-    <div>
-        <button type="submit">Submit</button>
-    </div>
-</form>
+        return render(request, 'intake/application_details_form.html', {
+            'application_details_data': application_details_data,
+           'intake_form_id': intake_form_id
+        })
