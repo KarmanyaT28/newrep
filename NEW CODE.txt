@@ -1,51 +1,9 @@
-def application_details_form(request, intake_form_id):
-    if request.method == 'POST':
-        application_name = request.POST.get('application_name')
-        ask_id = request.POST.get('ask_id')
-        functional_role = request.POST.get('functional_role')
-        title = f"{application_name}|{functional_role}"
+1, 2 field -- pre-filled as per selection of MUI
+DMU : Delivery management (Unix), DMU
 
-
-        with connection.cursor() as cursor:
-            # Check if a record exists for this intake_form_id
-            cursor.execute('''
-                SELECT COUNT(*) FROM application_details WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            exists = cursor.fetchone()[0]
-
-            if exists:
-                # Update existing record
-                cursor.execute('''
-                    UPDATE application_details
-                    SET application_name = %s, ask_id = %s, functional_role = %s
-                    WHERE intake_form_id = %s
-                ''', [application_name, ask_id, functional_role, intake_form_id])
-            else:
-                # Insert new record
-                cursor.execute('''
-                    INSERT INTO application_details (intake_form_id,application_name, ask_id, functional_role)
-                    VALUES (%s, %s, %s, %s)
-                ''', [intake_form_id, application_name, ask_id, functional_role])
-
-                cursor.execute("""
-                    UPDATE intake_form SET title = %s WHERE intake_form_id=%s
-                """,[title,intake_form_id])
-
-        # return redirect('secure_role_form', intake_form_id=intake_form_id)
-        if 'save_and_next' in request.POST:
-            return redirect('secure_role_form', intake_form_id=intake_form_id)
-        return redirect('application_details_form', intake_form_id=intake_form_id)
-    else:
-        # Fetch the latest data from the database for pre-filling the form
-        with connection.cursor() as cursor:
-            cursor.execute('''
-                SELECT application_name, ask_id, functional_role
-                FROM application_details
-                WHERE intake_form_id = %s
-            ''', [intake_form_id])
-            application_details_data = cursor.fetchone()
-
-        return render(request, 'intake/application_details_form.html', {
-            'application_details_data': application_details_data,
-           'intake_form_id': intake_form_id
-        })
+ 
+Secure Env: Drop down box
+ 
+if "Member Identifier Type" != "Restricted to IDs", Member Identifier should be insertable
+ 
+if "Member Identifier Type" == "Teradata database role || DB2 database role || Oracle database role || mySQL database role", Database Name should be insertable
