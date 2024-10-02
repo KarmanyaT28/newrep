@@ -1,7 +1,12 @@
+
+Here’s the complete code for your Django web application, including the enhanced inline CSS for a professional appearance. The code consists of the views.py, HTML files, and CSS styles to create a cohesive and functional application.
+
+1. views.py
+python
+Copy code
 import MySQLdb
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-# import pandas as pd
 import csv
 
 # MySQL database connection
@@ -17,7 +22,6 @@ def connect_db():
         return conn
     except MySQLdb.Error as e:
         print(f"Error connecting to MySQL: {e}")
-        # return None
 
 # Dashboard view to select an application
 def dashboard(request):
@@ -66,60 +70,37 @@ def edit_entries(request, app_name):
     return render(request, 'edit_entries.html', {'entries': entries, 'app_name': app_name})
 
 # View to generate the CSV file
-
-
-def generate_csv(request,app_name):
-    # Create the HTTPRESPONSE object with the appropriate CSV header
-
+def generate_csv(request, app_name):
     response = HttpResponse(content_type='text/csv')
-    response['Content Disposition'] = 'attachment;filename="asset_data.csv"'
-
+    response['Content-Disposition'] = 'attachment; filename="asset_data.csv"'
 
     writer = csv.writer(response)
+    writer.writerow(['Asset', 'Role', 'Command'])
 
-    writer.writerow(['Asset','Role','Command'])
-
-
-    # Retrieve data from the MYSQL table
-
+    # Retrieve data from the MySQL table
     conn = connect_db()
     cursor = conn.cursor()
-
-    #FETCH
 
     try:
         query = """
             SELECT Secure_Application_Name, Application_MUI, Secure_Environment, Secure_Role_Name, 
-            Member_Identifier, Member_Identifier_Type, Database_Name,Batch_Role_or_Support_Team_Member, Restricted_to_IDs, Viewpoint_Role, Role_Complete
+            Member_Identifier, Member_Identifier_Type, Database_Name, Batch_Role_or_Support_Team_Member, 
+            Restricted_to_IDs, Viewpoint_Role, Role_Complete
             FROM sync_config WHERE app_name=%s
-            """
-        # cursor.execute("""
-        #     SELECT Secure_Application_Name, Application_MUI, Secure_Environment, Secure_Role_Name, 
-        #     Member_Identifier, Member_Identifier_Type, Database_Name,Batch_Role_or_Support_Team_Member, Restricted_to_IDs, Viewpoint_Role, Role_Complete
-        #     FROM sync_config WHERE app_name=%s
-        #     """)
-
-        
+        """
         cursor.execute(query, (app_name,))
-        # rows = cursor.fetchall()
         rows = cursor.fetchall()
-        print(f"Fetched rows: {len(rows)}")
 
         for row in rows:
-            writer.writerow([row[0],f'Role={row[1]}',row[2]])
-
+            writer.writerow([row[0], f'Role={row[1]}', row[2]])
 
     except MySQLdb.Error as e:
-        return HttpResponse(f"Database error: {e}",status=500)
-    
+        return HttpResponse(f"Database error: {e}", status=500)
+
     finally:
         cursor.close()
         conn.close()
     return response
-    
-
-
-
 
 def view_entries(request, app_name):
     conn = connect_db()
@@ -135,8 +116,6 @@ def view_entries(request, app_name):
         'app_name': app_name
     })
 
-
-
 def delete_entry(request, entry_id, app_name):
     conn = connect_db()
     cursor = conn.cursor()
@@ -147,30 +126,291 @@ def delete_entry(request, entry_id, app_name):
     conn.commit()
 
     return redirect(f'/view_entries/{app_name}/')
+2. dashboard.html
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Dashboard</h1>
+        <h2>Select an Application</h2>
+        <ul>
+            {% for app in apps %}
+                <li><a href="{% url 'edit_entries' app %}">{{ app }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
+3. edit_entries.html
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Entries - {{ app_name }}</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Entries for {{ app_name }}</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <label for="Secure_Application_Name">Secure Application Name</label>
+            <input type="text" id="Secure_Application_Name" name="Secure_Application_Name" required>
+            
+            <label for="Application_MUI">Application MUI</label>
+            <input type="text" id="Application_MUI" name="Application_MUI" required>
+            
+            <label for="Secure_Environment">Secure Environment</label>
+            <select id="Secure_Environment" name="Secure_Environment" required>
+                <option value="Production">Production</option>
+                <option value="Staging">Staging</option>
+                <option value="Development">Development</option>
+            </select>
 
+            <label for="Secure_Role_Name">Secure Role Name</label>
+            <input type="text" id="Secure_Role_Name" name="Secure_Role_Name" required>
+            
+            <label for="Member_Identifier">Member Identifier</label>
+            <input type="text" id="Member_Identifier" name="Member_Identifier">
+            
+            <label for="Member_Identifier_Type">Member Identifier Type</label>
+            <select id="Member_Identifier_Type" name="Member_Identifier_Type">
+                <option value="Restricted to IDs">Restricted to IDs</option>
+                <option value="Teradata database role">Teradata database role</option>
+                <option value="DB2 database role">DB2 database role</option>
+                <option value="MySQL database role">MySQL database role</option>
+                <option value="Azure group">Azure group</option>
+            </select>
+            
+            <label for="Database_Name">Database Name</label>
+            <input type="text" id="Database_Name" name="Database_Name">
+            
+            <label for="Batch_Role_or_Support_Team_Member">Batch Role or Support Team Member</label>
+            <select id="Batch_Role_or_Support_Team_Member" name="Batch_Role_or_Support_Team_Member">
+                <option value="Batch Role">Batch Role</option>
+                <option value="Support Team Member">Support Team Member</option>
+            </select>
 
+            <label for="Restricted_to_IDs">Restricted to IDs</label>
+            <input type="text" id="Restricted_to_IDs" name="Restricted_to_IDs">
 
+            <label for="Viewpoint_Role">Viewpoint Role</label>
+            <input type="text" id="Viewpoint_Role" name="Viewpoint_Role">
 
+            <label for="Role_Complete">Role Complete</label>
+            <input type="text" id="Role_Complete" name="Role_Complete">
 
+            <button type="submit">Add Entry</button>
+        </form>
 
+        <div class="entry-list">
+            <h2>Existing Entries</h2>
+            {% for entry in entries %}
+                <div class="entry">
+                    <p>{{ entry }}</p>
+                    <form method="POST" action="{% url 'delete_entry' entry.id app_name %}">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-button">Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
+4. view_entries.html
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Entries - {{ app_name }}</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>View Entries for {{ app_name }}</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Secure Application Name</th>
+                    <th>Application MUI</th>
+                    <th>Secure Environment</th>
+                    <th>Secure Role Name</th>
+                    <th>Member Identifier</th>
+                    <th>Member Identifier Type</th>
+                    <th>Database Name</th>
+                    <th>Batch Role or Support Team Member</th>
+                    <th>Restricted to IDs</th>
+                    <th>Viewpoint Role</th>
+                    <th>Role Complete</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                    <tr>
+                        <td>{{ entry.0 }}</td>
+                        <td>{{ entry.1 }}</td>
+                        <td>{{ entry.2 }}</td>
+                        <td>{{ entry.3 }}</td>
+                        <td>{{ entry.4 }}</td>
+                        <td>{{ entry.5 }}</td>
+                        <td>{{ entry.6 }}</td>
+                        <td>{{ entry.7 }}</td>
+                        <td>{{ entry.8 }}</td>
+                        <td>{{ entry.9 }}</td>
+                        <td>{{ entry.10 }}</td>
+                        <td>
+                            <form method="POST" action="{% url 'delete_entry' entry.id app_name %}">
+                                {% csrf_token %}
+                                <button type="submit" class="delete-button">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'generate_csv' app_name %}">Download CSV</a>
+    </div>
+</body>
+</html>
+5. styles.css
+css
+Copy code
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+/* Body Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+}
 
+/* Container for Content */
+.container {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
 
+/* Headings */
+h1, h2, h3, h4 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
 
+/* Form Styles */
+form {
+    margin: 20px 0;
+}
 
+/* Labels */
+label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+}
 
+/* Input Fields */
+input[type="text"],
+input[type="email"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border 0.3s;
+}
 
+input[type="text"]:focus,
+input[type="email"]:focus,
+select:focus {
+    border: 1px solid #3498db;
+}
 
+/* Buttons */
+button {
+    padding: 10px 15px;
+    background: #3498db;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
 
+button:hover {
+    background: #2980b9;
+}
 
+/* Entry List Styles */
+.entry-list {
+    margin-top: 20px;
+}
 
+.entry {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    background: #ecf0f1;
+}
 
-Secure Application Name and MUI -- pre-filled as per selection of MUI
-DMU : Delivery management (Unix), DMU
+/* Delete Button */
+.delete-button {
+    background: #e74c3c;
+    border: none;
+    padding: 5px 10px;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
 
- 
-Secure Env: Drop down box
- 
-if "Member Identifier Type" != "Restricted to IDs", Member Identifier should be insertable
- 
-if "Member Identifier Type" == "Teradata database role || DB2 database role || Oracle database role || mySQL database role", Database Name should be insertable
+.delete-button:hover {
+    background: #c0392b;
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+}
+Summary
+This complete code set includes:
+
+Django Views: The views.py contains the logic for database connection, rendering templates, handling form submissions, and generating CSV downloads.
+HTML Templates: The dashboard.html, edit_entries.html, and view_entries.html files present a user-friendly interface for managing entries.
+CSS Styles: The styles.css file enhances the appearance of your application, providing a clean and modern look.
+Next Steps
+Make sure to update the database connection details in views.py to match your environment.
+Include necessary URLs in your urls.py to ensure the views work as expected.
+Test the application locally to confirm everything is functioning correctly.
+Let me know if you need any more adjustments or additions!
