@@ -1,21 +1,51 @@
 <form method="POST">
-        {% csrf_token %}
-        <input type="text" name="Secure_Application_Name" placeholder="Secure Application Name" required>
-        <input type="text" name="Application_MUI" placeholder="Application MUI" required>
-        <input type="text" name="Secure_Environment" placeholder="Secure Environment" required>
-        <input type="text" name="Secure_Role_Name" placeholder="Secure Role Name" required>
-        <input type="text" name="Member_Identifier" placeholder="Member Identifier" required>
-        <select name="Member_Identifier_Type" required>
-            <option value="">Select Member Identifier Type</option>
-            <option value="Teradata Database Role">Teradata Database Role</option>
-            <option value="DB2 Database Role">DB2 Database Role</option>
-            <option value="Oracle Database Role">Oracle Database Role</option>
-            <option value="MySQL Database Role">MySQL Database Role</option>
-        </select>
-        <input type="text" name="Database_Name" placeholder="Database Name">
-        <input type="text" name="Batch_Role_or_Support_Team_Member" placeholder="Batch Role or Support Team Member" required>
-        <input type="text" name="Restricted_to_IDs" placeholder="Restricted to IDs">
-        <input type="text" name="Viewpoint_Role" placeholder="Viewpoint Role" required>
-        <input type="text" name="Role_Complete" placeholder="Role Complete" required>
-        <button type="submit">Add Entry</button>
-    </form>
+    {% csrf_token %}
+    <input type="text" name="Secure_Application_Name" id="secureApplication" placeholder="Secure Application Name" value="{{ app_name }}" required>
+    <input type="text" name="Application_MUI" id="applicationMUI" placeholder="Application MUI" value="{{ app_name }}" required>
+    <input type="text" name="Secure_Environment" placeholder="Secure Environment" required>
+    <input type="text" name="Secure_Role_Name" placeholder="Secure Role Name" required>
+    
+    <input type="text" name="Member_Identifier" id="memberIdentifier" placeholder="Member Identifier">
+    
+    <select name="Member_Identifier_Type" id="memberIdentifierType" required onchange="toggleMemberIdentifier()">
+        <option value="">Select Member Identifier Type</option>
+        <option value="Teradata Database Role">Teradata Database Role</option>
+        <option value="DB2 Database Role">DB2 Database Role</option>
+        <option value="Oracle Database Role">Oracle Database Role</option>
+        <option value="MySQL Database Role">MySQL Database Role</option>
+        <option value="Restricted to IDs">Restricted to IDs</option>
+    </select>
+    
+    <input type="text" name="Database_Name" id="databaseName" placeholder="Database Name">
+    
+    <input type="text" name="Batch_Role_or_Support_Team_Member" placeholder="Batch Role or Support Team Member" required>
+    <input type="text" name="Restricted_to_IDs" placeholder="Restricted to IDs">
+    <input type="text" name="Viewpoint_Role" placeholder="Viewpoint Role" required>
+    <input type="text" name="Role_Complete" placeholder="Role Complete" required>
+    
+    <button type="submit">Add Entry</button>
+</form>
+
+<script>
+function toggleMemberIdentifier() {
+    var memberIdentifierType = document.getElementById("memberIdentifierType").value;
+    var memberIdentifier = document.getElementById("memberIdentifier");
+    var databaseName = document.getElementById("databaseName");
+
+    // Enable or disable Member Identifier based on the selected type
+    if (memberIdentifierType === "Restricted to IDs") {
+        memberIdentifier.value = null; // Set to NULL
+        memberIdentifier.setAttribute('readonly', true); // Disable input
+    } else {
+        memberIdentifier.removeAttribute('readonly'); // Enable input
+    }
+
+    // Enable or disable Database Name based on Member Identifier Type
+    if (["Teradata Database Role", "DB2 Database Role", "Oracle Database Role", "MySQL Database Role"].includes(memberIdentifierType)) {
+        databaseName.removeAttribute('readonly'); // Enable input
+    } else {
+        databaseName.value = null; // Set to NULL
+        databaseName.setAttribute('readonly', true); // Disable input
+    }
+}
+</script>
