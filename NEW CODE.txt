@@ -148,3 +148,29 @@ def delete_entry(request, entry_id, app_name):
 
     return redirect(f'/view_entries/{app_name}/')
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Secure Application Name and MUI -- pre-filled as per selection of MUI
+DMU : Delivery management (Unix), DMU
+
+ 
+Secure Env: Drop down box
+ 
+if "Member Identifier Type" != "Restricted to IDs", Member Identifier should be insertable
+ 
+if "Member Identifier Type" == "Teradata database role || DB2 database role || Oracle database role || mySQL database role", Database Name should be insertable
