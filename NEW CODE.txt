@@ -1,51 +1,152 @@
-<form method="POST">
-    {% csrf_token %}
-    <input type="text" name="Secure_Application_Name" id="secureApplication" placeholder="Secure Application Name" value="{{ app_name }}" required>
-    <input type="text" name="Application_MUI" id="applicationMUI" placeholder="Application MUI" value="{{ app_name }}" required>
-    <input type="text" name="Secure_Environment" placeholder="Secure Environment" required>
-    <input type="text" name="Secure_Role_Name" placeholder="Secure Role Name" required>
-    
-    <input type="text" name="Member_Identifier" id="memberIdentifier" placeholder="Member Identifier">
-    
-    <select name="Member_Identifier_Type" id="memberIdentifierType" required onchange="toggleMemberIdentifier()">
-        <option value="">Select Member Identifier Type</option>
-        <option value="Teradata Database Role">Teradata Database Role</option>
-        <option value="DB2 Database Role">DB2 Database Role</option>
-        <option value="Oracle Database Role">Oracle Database Role</option>
-        <option value="MySQL Database Role">MySQL Database Role</option>
-        <option value="Restricted to IDs">Restricted to IDs</option>
-    </select>
-    
-    <input type="text" name="Database_Name" id="databaseName" placeholder="Database Name">
-    
-    <input type="text" name="Batch_Role_or_Support_Team_Member" placeholder="Batch Role or Support Team Member" required>
-    <input type="text" name="Restricted_to_IDs" placeholder="Restricted to IDs">
-    <input type="text" name="Viewpoint_Role" placeholder="Viewpoint Role" required>
-    <input type="text" name="Role_Complete" placeholder="Role Complete" required>
-    
-    <button type="submit">Add Entry</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Entries - {{ app_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, select, button {
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: calc(100% - 22px);
+        }
+        button {
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .entry-table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .entry-table th, .entry-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .entry-table th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Edit Entries - {{ app_name }}</h1>
 
-<script>
-function toggleMemberIdentifier() {
-    var memberIdentifierType = document.getElementById("memberIdentifierType").value;
-    var memberIdentifier = document.getElementById("memberIdentifier");
-    var databaseName = document.getElementById("databaseName");
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="Secure_Application_Name" id="secureApplication" placeholder="Secure Application Name" value="{{ app_name }}" required>
+        <input type="text" name="Application_MUI" id="applicationMUI" placeholder="Application MUI" value="{{ app_name }}" required>
+        <input type="text" name="Secure_Environment" placeholder="Secure Environment" required>
+        <input type="text" name="Secure_Role_Name" placeholder="Secure Role Name" required>
+        
+        <input type="text" name="Member_Identifier" id="memberIdentifier" placeholder="Member Identifier">
+        
+        <select name="Member_Identifier_Type" id="memberIdentifierType" required onchange="toggleMemberIdentifier()">
+            <option value="">Select Member Identifier Type</option>
+            <option value="Teradata Database Role">Teradata Database Role</option>
+            <option value="DB2 Database Role">DB2 Database Role</option>
+            <option value="Oracle Database Role">Oracle Database Role</option>
+            <option value="MySQL Database Role">MySQL Database Role</option>
+            <option value="Restricted to IDs">Restricted to IDs</option>
+        </select>
+        
+        <input type="text" name="Database_Name" id="databaseName" placeholder="Database Name">
+        
+        <input type="text" name="Batch_Role_or_Support_Team_Member" placeholder="Batch Role or Support Team Member" required>
+        <input type="text" name="Restricted_to_IDs" placeholder="Restricted to IDs">
+        <input type="text" name="Viewpoint_Role" placeholder="Viewpoint Role" required>
+        <input type="text" name="Role_Complete" placeholder="Role Complete" required>
+        
+        <button type="submit">Add Entry</button>
+    </form>
+    
+    
 
-    // Enable or disable Member Identifier based on the selected type
-    if (memberIdentifierType === "Restricted to IDs") {
-        memberIdentifier.value = null; // Set to NULL
-        memberIdentifier.setAttribute('readonly', true); // Disable input
-    } else {
-        memberIdentifier.removeAttribute('readonly'); // Enable input
-    }
+    <table class="entry-table">
+        <thead>
+            <tr>
+                <th>Secure Application Name</th>
+                <th>Application MUI</th>
+                <th>Secure Environment</th>
+                <th>Secure Role Name</th>
+                <th>Member Identifier</th>
+                <th>Member Identifier Type</th>
+                <th>Database Name</th>
+                <th>Batch Role or Support Team Member</th>
+                <th>Restricted to IDs</th>
+                <th>Viewpoint Role</th>
+                <th>Role Complete</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.1 }}</td>
+                    <td>{{ entry.2 }}</td>
+                    <td>{{ entry.3 }}</td>
+                    <td>{{ entry.4 }}</td>
+                    <td>{{ entry.5 }}</td>
+                    <td>{{ entry.6 }}</td>
+                    <td>{{ entry.7 }}</td>
+                    <td>{{ entry.8 }}</td>
+                    <td>{{ entry.9 }}</td>
+                    <td>{{ entry.10 }}</td>
+                    <td>{{ entry.11 }}</td>
+                    <td>
+                        <a href="/delete_entry/{{ entry.0 }}/{{ app_name }}/" style="color:red;">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-    // Enable or disable Database Name based on Member Identifier Type
-    if (["Teradata Database Role", "DB2 Database Role", "Oracle Database Role", "MySQL Database Role"].includes(memberIdentifierType)) {
-        databaseName.removeAttribute('readonly'); // Enable input
-    } else {
-        databaseName.value = null; // Set to NULL
-        databaseName.setAttribute('readonly', true); // Disable input
-    }
-}
-</script>
+    <a href="/generate_csv/{{ app_name }}/" style="display:block; margin-top: 20px;">Download CSV</a>
+    <script>
+        function toggleMemberIdentifier() {
+            var memberIdentifierType = document.getElementById("memberIdentifierType").value;
+            var memberIdentifier = document.getElementById("memberIdentifier");
+            var databaseName = document.getElementById("databaseName");
+        
+            // Enable or disable Member Identifier based on the selected type
+            if (memberIdentifierType === "Restricted to IDs") {
+                memberIdentifier.value = null; // Set to NULL
+                memberIdentifier.setAttribute('readonly', true); // Disable input
+            } else {
+                memberIdentifier.removeAttribute('readonly'); // Enable input
+            }
+        
+            // Enable or disable Database Name based on Member Identifier Type
+            if (["Teradata Database Role", "DB2 Database Role", "Oracle Database Role", "MySQL Database Role"].includes(memberIdentifierType)) {
+                databaseName.removeAttribute('readonly'); // Enable input
+            } else {
+                databaseName.value = null; // Set to NULL
+                databaseName.setAttribute('readonly', true); // Disable input
+            }
+        }
+        </script>
+
+</body>
+</html>
