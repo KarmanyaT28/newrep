@@ -1,6 +1,3 @@
-Updated views.py
-python
-Copy code
 import MySQLdb
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
@@ -11,10 +8,10 @@ def connect_db():
     try:
         conn = MySQLdb.connect(
             host='rn000111667',       # e.g., 'localhost'
-            user='ktyagi19',         # MySQL username
+            user='ktyagi19',       # MySQL username
             password='Mysecurityengineer=99535', # MySQL password
-            database='SECDEVDB',     # MySQL database name
-            port=3306                 # MySQL port (default is 3306)
+            database='SECDEVDB', # MySQL database name
+            port=3306                     # MySQL port (default is 3306)
         )
         return conn
     except MySQLdb.Error as e:
@@ -24,10 +21,6 @@ def connect_db():
 def dashboard(request):
     apps = ['CRM', 'DMA', 'DMM', 'DMU', 'DS3', 'GALAXY', 'MLA', 'NHI', 'OFF', 'RDM', 'RTS', 'STR', 'RPS']
     return render(request, 'dashboard.html', {'apps': apps})
-
-# View to handle selection of VIEW or ADD
-def select_action(request, app_name):
-    return render(request, 'select_action.html', {'app_name': app_name})
 
 # View to display and edit entries for a specific app
 def edit_entries(request, app_name):
@@ -53,12 +46,6 @@ def edit_entries(request, app_name):
         viewpoint_role = request.POST.get('Viewpoint_Role')
         role_complete = request.POST.get('Role_Complete')
 
-        # Ensure that fields are validated based on Member Identifier Type
-        if member_identifier_type == "Restricted to IDs":
-            member_identifier = None
-        if member_identifier_type in ["Teradata database role", "DB2 database role", "Oracle database role", "MySQL database role"]:
-            database_name = None
-
         insert_query = """
             INSERT INTO sync_config (
                 app_name, Secure_Application_Name, Application_MUI, Secure_Environment, 
@@ -76,28 +63,39 @@ def edit_entries(request, app_name):
 
     return render(request, 'edit_entries.html', {'entries': entries, 'app_name': app_name})
 
+# View to generate the CSV file
 def generate_csv(request, app_name):
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="{app_name}_data.csv"'
+    response['Content-Disposition'] = 'attachment; filename="sync_RPS.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(['Secure Application Name', 'MUI', 'Secure Environment', 'Secure Role Name', 
-                     'Member Identifier', 'Member Identifier Type', 'Database Name', 
-                     'Batch Role or Support Team Member', 'Restricted to IDs', 'Viewpoint Role', 'Role Complete'])
+    writer.writerow(['Secure Application Name', 'Application MUI', 'Secure Environment', 
+                     'Secure Role Name', 'Member Identifier Type', 'Member Identifier', 
+                     'Database Name', 'Batch Role or Support Team Member', 
+                     'Restricted to IDs', 'Viewpoint Role', 'Role Complete'])
 
     conn = connect_db()
     cursor = conn.cursor()
-    query = """
-        SELECT Secure_Application_Name, Application_MUI, Secure_Environment, Secure_Role_Name, 
-        Member_Identifier, Member_Identifier_Type, Database_Name, Batch_Role_or_Support_Team_Member, 
-        Restricted_to_IDs, Viewpoint_Role, Role_Complete 
-        FROM sync_config WHERE app_name=%s
-    """
-    cursor.execute(query, (app_name,))
-    rows = cursor.fetchall()
 
-    for row in rows:
-        writer.writerow(row)
+    try:
+        query = """
+            SELECT Secure_Application_Name, Application_MUI, Secure_Environment, Secure_Role_Name, 
+            Member_Identifier_Type, Member_Identifier, Database_Name, Batch_Role_or_Support_Team_Member, 
+            Restricted_to_IDs, Viewpoint_Role, Role_Complete
+            FROM sync_config WHERE app_name=%s
+        """
+        cursor.execute(query, (app_name,))
+        rows = cursor.fetchall()
+
+        for row in rows:
+            writer.writerow(row)
+
+    except MySQLdb.Error as e:
+        return HttpResponse(f"Database error: {e}", status=500)
+    
+    finally:
+        cursor.close()
+        conn.close()
 
     return response
 
@@ -105,6 +103,7 @@ def view_entries(request, app_name):
     conn = connect_db()
     cursor = conn.cursor()
 
+    # Fetch all entries for the selected application
     query = "SELECT * FROM sync_config WHERE app_name = %s"
     cursor.execute(query, (app_name,))
     entries = cursor.fetchall()
@@ -118,78 +117,15 @@ def delete_entry(request, entry_id, app_name):
     conn = connect_db()
     cursor = conn.cursor()
 
+    # Delete the specific entry by ID
     delete_query = "DELETE FROM sync_config WHERE id = %s"
     cursor.execute(delete_query, (entry_id,))
     conn.commit()
 
     return redirect(f'/view_entries/{app_name}/')
-Updated urls.py
-python
-Copy code
-from django.urls import path
-from . import views
+2. templates/dashboard.html
+The dashboard allows users to select an application and navigate to the VIEW or ADD options.
 
-urlpatterns = [
-    path('', views.dashboard, name='dashboard'),
-    path('select_action/<str:app_name>/', views.select_action, name='select_action'),
-    path('edit_entries/<str:app_name>/', views.edit_entries, name='edit_entries'),
-    path('view_entries/<str:app_name>/', views.view_entries, name='view_entries'),
-    path('delete_entry/<int:entry_id>/<str:app_name>/', views.delete_entry, name='delete_entry'),
-    path('generate_csv/<str:app_name>/', views.generate_csv, name='generate_csv'),
-]
-New HTML: select_action.html
-html
-Copy code
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Action</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-        }
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            color: white;
-            background-color: #007BFF;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>Select Action for {{ app_name }}</h1>
-    <a href="{% url 'view_entries' app_name %}" class="btn">View Entries</a>
-    <a href="{% url 'edit_entries' app_name %}" class="btn">Add New Entry</a>
-</div>
-
-</body>
-</html>
-Updated dashboard.html
 html
 Copy code
 <!DOCTYPE html>
@@ -203,71 +139,73 @@ Copy code
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
         }
         h1 {
-            text-align: center;
+            color: #333;
         }
-        .app-button {
-            display: block;
-            width: 100%;
+        select, button {
             padding: 10px;
-            margin: 10px 0;
-            color: white;
-            background-color: #007BFF;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            margin: 10px;
             font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .container {
             text-align: center;
-            text-decoration: none;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Select an Application</h1>
+        <select id="appSelect">
+            <option value="">--Select an Application--</option>
+            {% for app in apps %}
+                <option value="{{ app }}">{{ app }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button onclick="navigateTo()">Proceed</button>
+    </div>
 
-<div class="container">
-    <h1>Select an Application</h1>
-    {% for app in apps %}
-        <a href="{% url 'select_action' app %}" class="app-button">{{ app }}</a>
-    {% endfor %}
-</div>
-
+    <script>
+        function navigateTo() {
+            const app = document.getElementById("appSelect").value;
+            if (app) {
+                window.location.href = `/edit_entries/${app}/`;
+            } else {
+                alert("Please select an application.");
+            }
+        }
+    </script>
 </body>
 </html>
-Updated edit_entries.html
+3. templates/edit_entries.html
+This page handles adding new entries and displays the existing entries.
+
 html
 Copy code
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device
-
-
-
-
-
-
-You said:
-why stopped?
-ChatGPT said:
-ChatGPT
-Here’s the continuation of the edit_entries.html file, followed by the new view_entries.html file:
-
-Continued edit_entries.html
-html
-Copy code
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Entries</title>
+    <title>Edit Entries - {{ app_name }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -275,143 +213,116 @@ Copy code
             margin: 0;
             padding: 20px;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
         h1 {
-            text-align: center;
+            color: #333;
         }
-        table {
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, select, button {
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: calc(100% - 22px);
+        }
+        button {
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .entry-table {
+            margin-top: 20px;
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
         }
-        th, td {
-            padding: 10px;
+        .entry-table th, .entry-table td {
             border: 1px solid #ddd;
-            text-align: left;
+            padding: 8px;
         }
-        th {
-            background-color: #007BFF;
-            color: white;
-        }
-        .btn {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px 0;
+        .entry-table th {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h1>Edit Entries for {{ app_name }}</h1>
+    <h1>Edit Entries - {{ app_name }}</h1>
 
     <form method="POST">
         {% csrf_token %}
-        <label for="Secure_Application_Name">Secure Application Name:</label>
-        <input type="text" id="Secure_Application_Name" name="Secure_Application_Name" required><br><br>
-
-        <label for="Application_MUI">Application MUI:</label>
-        <input type="text" id="Application_MUI" name="Application_MUI" required><br><br>
-
-        <label for="Secure_Environment">Secure Environment:</label>
-        <select id="Secure_Environment" name="Secure_Environment" required>
-            <option value="Development">Development</option>
-            <option value="Production">Production</option>
-        </select><br><br>
-
-        <label for="Secure_Role_Name">Secure Role Name:</label>
-        <input type="text" id="Secure_Role_Name" name="Secure_Role_Name" required><br><br>
-
-        <label for="Member_Identifier_Type">Member Identifier Type:</label>
-        <select id="Member_Identifier_Type" name="Member_Identifier_Type" onchange="checkMemberIdentifier()" required>
-            <option value="Restricted to IDs">Restricted to IDs</option>
-            <option value="Teradata database role">Teradata Database Role</option>
-            <option value="DB2 database role">DB2 Database Role</option>
-            <option value="Oracle database role">Oracle Database Role</option>
-            <option value="MySQL database role">MySQL Database Role</option>
-            <option value="Other">Other</option>
-        </select><br><br>
-
-        <label for="Member_Identifier">Member Identifier:</label>
-        <input type="text" id="Member_Identifier" name="Member_Identifier"><br><br>
-
-        <label for="Database_Name">Database Name:</label>
-        <input type="text" id="Database_Name" name="Database_Name"><br><br>
-
-        <label for="Batch_Role_or_Support_Team_Member">Batch Role or Support Team Member:</label>
-        <input type="text" id="Batch_Role_or_Support_Team_Member" name="Batch_Role_or_Support_Team_Member"><br><br>
-
-        <label for="Restricted_to_IDs">Restricted to IDs:</label>
-        <select id="Restricted_to_IDs" name="Restricted_to_IDs" required>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-        </select><br><br>
-
-        <label for="Viewpoint_Role">Viewpoint Role:</label>
-        <input type="text" id="Viewpoint_Role" name="Viewpoint_Role"><br><br>
-
-        <label for="Role_Complete">Role Complete:</label>
-        <input type="text" id="Role_Complete" name="Role_Complete"><br><br>
-
-        <input type="submit" class="btn" value="Add Entry">
+        <input type="text" name="Secure_Application_Name" placeholder="Secure Application Name" required>
+        <input type="text" name="Application_MUI" placeholder="Application MUI" required>
+        <input type="text" name="Secure_Environment" placeholder="Secure Environment" required>
+        <input type="text" name="Secure_Role_Name" placeholder="Secure Role Name" required>
+        <input type="text" name="Member_Identifier" placeholder="Member Identifier" required>
+        <select name="Member_Identifier_Type" required>
+            <option value="">Select Member Identifier Type</option>
+            <option value="Teradata Database Role">Teradata Database Role</option>
+            <option value="DB2 Database Role">DB2 Database Role</option>
+            <option value="Oracle Database Role">Oracle Database Role</option>
+            <option value="MySQL Database Role">MySQL Database Role</option>
+        </select>
+        <input type="text" name="Database_Name" placeholder="Database Name">
+        <input type="text" name="Batch_Role_or_Support_Team_Member" placeholder="Batch Role or Support Team Member" required>
+        <input type="text" name="Restricted_to_IDs" placeholder="Restricted to IDs">
+        <input type="text" name="Viewpoint_Role" placeholder="Viewpoint Role" required>
+        <input type="text" name="Role_Complete" placeholder="Role Complete" required>
+        <button type="submit">Add Entry</button>
     </form>
 
-    <h2>Existing Entries:</h2>
-    <table>
-        <tr>
-            <th>Secure Application Name</th>
-            <th>MUI</th>
-            <th>Secure Environment</th>
-            <th>Actions</th>
-        </tr>
-        {% for entry in entries %}
+    <table class="entry-table">
+        <thead>
             <tr>
-                <td>{{ entry.1 }}</td>
-                <td>{{ entry.2 }}</td>
-                <td>{{ entry.3 }}</td>
-                <td>
-                    <a href="{% url 'delete_entry' entry.0 app_name %}" class="btn">Delete</a>
-                </td>
+                <th>Secure Application Name</th>
+                <th>Application MUI</th>
+                <th>Secure Environment</th>
+                <th>Secure Role Name</th>
+                <th>Member Identifier</th>
+                <th>Member Identifier Type</th>
+                <th>Database Name</th>
+                <th>Batch Role or Support Team Member</th>
+                <th>Restricted to IDs</th>
+                <th>Viewpoint Role</th>
+                <th>Role Complete</th>
+                <th>Actions</th>
             </tr>
-        {% endfor %}
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.1 }}</td>
+                    <td>{{ entry.2 }}</td>
+                    <td>{{ entry.3 }}</td>
+                    <td>{{ entry.4 }}</td>
+                    <td>{{ entry.5 }}</td>
+                    <td>{{ entry.6 }}</td>
+                    <td>{{ entry.7 }}</td>
+                    <td>{{ entry.8 }}</td>
+                    <td>{{ entry.9 }}</td>
+                    <td>{{ entry.10 }}</td>
+                    <td>{{ entry.11 }}</td>
+                    <td>
+                        <a href="/delete_entry/{{ entry.0 }}/{{ app_name }}/" style="color:red;">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
     </table>
-</div>
 
-<script>
-    function checkMemberIdentifier() {
-        const memberIdentifierType = document.getElementById("Member_Identifier_Type").value;
-        const memberIdentifier = document.getElementById("Member_Identifier");
-        const databaseName = document.getElementById("Database_Name");
-
-        if (memberIdentifierType === "Restricted to IDs") {
-            memberIdentifier.value = null;
-            memberIdentifier.disabled = true;
-        } else {
-            memberIdentifier.disabled = false;
-        }
-
-        if (["Teradata database role", "DB2 database role", "Oracle database role", "MySQL database role"].includes(memberIdentifierType)) {
-            databaseName.disabled = false;
-        } else {
-            databaseName.value = null;
-            databaseName.disabled = true;
-        }
-    }
-</script>
+    <a href="/generate_csv/{{ app_name }}/" style="display:block; margin-top: 20px;">Download CSV</a>
 </body>
 </html>
-New HTML: view_entries.html
+4. templates/view_entries.html
+This page displays entries in a styled manner.
+
 html
 Copy code
 <!DOCTYPE html>
@@ -419,7 +330,7 @@ Copy code
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Entries</title>
+    <title>View Entries - {{ app_name }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -427,74 +338,79 @@ Copy code
             margin: 0;
             padding: 20px;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
         h1 {
-            text-align: center;
+            color: #333;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-top: 20px;
         }
         th, td {
-            padding: 10px;
             border: 1px solid #ddd;
+            padding: 8px;
             text-align: left;
         }
         th {
-            background-color: #007BFF;
-            color: white;
+            background-color: #f2f2f2;
         }
-        .btn {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px 0;
+        tr:hover {
+            background-color: #f1f1f1;
         }
     </style>
 </head>
 <body>
+    <h1>View Entries - {{ app_name }}</h1>
 
-<div class="container">
-    <h1>Entries for {{ app_name }}</h1>
     <table>
-        <tr>
-            <th>Secure Application Name</th>
-            <th>MUI</th>
-            <th>Secure Environment</th>
-            <th>Actions</th>
-        </tr>
-        {% for entry in entries %}
+        <thead>
             <tr>
-                <td>{{ entry.1 }}</td>
-                <td>{{ entry.2 }}</td>
-                <td>{{ entry.3 }}</td>
-                <td>
-                    <a href="{% url 'delete_entry' entry.0 app_name %}" class="btn">Delete</a>
-                </td>
+                <th>Secure Application Name</th>
+                <th>Application MUI</th>
+                <th>Secure Environment</th>
+                <th>Secure Role Name</th>
+                <th>Member Identifier</th>
+                <th>Member Identifier Type</th>
+                <th>Database Name</th>
+                <th>Batch Role or Support Team Member</th>
+                <th>Restricted to IDs</th>
+                <th>Viewpoint Role</th>
+                <th>Role Complete</th>
+                <th>Actions</th>
             </tr>
-        {% endfor %}
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.1 }}</td>
+                    <td>{{ entry.2 }}</td>
+                    <td>{{ entry.3 }}</td>
+                    <td>{{ entry.4 }}</td>
+                    <td>{{ entry.5 }}</td>
+                    <td>{{ entry.6 }}</td>
+                    <td>{{ entry.7 }}</td>
+                    <td>{{ entry.8 }}</td>
+                    <td>{{ entry.9 }}</td>
+                    <td>{{ entry.10 }}</td>
+                    <td>{{ entry.11 }}</td>
+                    <td>
+                        <a href="/delete_entry/{{ entry.0 }}/{{ app_name }}/" style="color:red;">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
     </table>
-    <a href="{% url 'edit_entries' app_name %}" class="btn">Add New Entry</a>
-</div>
 
+    <a href="/generate_csv/{{ app_name }}/" style="display:block; margin-top: 20px;">Download CSV</a>
 </body>
 </html>
-Summary of Changes:
-New Page Structure: Created a new select_action.html page for choosing between VIEW or ADD.
-Enhanced Logic: Implemented logic to control the fields based on Member Identifier Type.
-New Entry Management: edit_entries.html now supports adding and viewing existing entries with the specified validations.
-This code should provide a professional-looking frontend with the necessary functionality for your Django application. Let me know if you need further modifications or features!
+Summary of Changes
+Styling: Added inline CSS to enhance the visual appeal of the dashboard and entry forms.
+JavaScript: Simple navigation logic to redirect users based on selected applications.
+Form Functionality: The form in the edit_entries.html page uses placeholders for the chosen application.
+View Entries: Entries are displayed in a structured table format, maintaining professional design.
+CSV Download: A link is provided to download the CSV file for the selected application.
+You can copy and paste this code into your Django project, ensuring you have the corresponding routes set up correctly. If you need further adjustments or enhancements, feel free to ask!
 
 
 
