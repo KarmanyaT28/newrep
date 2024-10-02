@@ -1,3 +1,41 @@
+# View to generate the CSV file
+def generate_csv(request, app_name):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="sync_RPS.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Secure Application Name', 'Application MUI', 'Secure Environment', 
+                     'Secure Role Name', 'Member Identifier Type', 'Member Identifier', 
+                     'Database Name', 'Batch Role or Support Team Member', 
+                     'Restricted to IDs', 'Viewpoint Role', 'Role Complete'])
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    try:
+        query = """
+            SELECT Secure_Application_Name, Application_MUI, Secure_Environment, Secure_Role_Name, 
+            Member_Identifier_Type, Member_Identifier, Database_Name, Batch_Role_or_Support_Team_Member, 
+            Restricted_to_IDs, Viewpoint_Role, Role_Complete
+            FROM sync_config WHERE app_name=%s
+        """
+        cursor.execute(query, (app_name,))
+        rows = cursor.fetchall()
+
+        for row in rows:
+            writer.writerow(row)
+
+    except MySQLdb.Error as e:
+        return HttpResponse(f"Database error: {e}", status=500)
+    
+    finally:
+        cursor.close()
+        conn.close()
+
+    return response
+
+
+
 import MySQLdb
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
