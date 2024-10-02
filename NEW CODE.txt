@@ -1,298 +1,150 @@
-myproject/
-│
-├── myapp/
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── migrations/
-│   ├── static/
-│   ├── templates/
-│   │   ├── dashboard.html
-│   │   ├── edit_entries.html
-│   │   ├── view_entries.html
-│   │   └── add_entry.html
-│   ├── urls.py
-│   └── views.py
-│
-├── myproject/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-│
-└── manage.py
-1. views.py
-Make sure to include the logic for downloading CSV files.
-
-python
-Copy code
-import mysql.connector
-import csv
+import MySQLdb
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+# import pandas as pd
+import csv
 
+# MySQL database connection
 def connect_db():
-    return mysql.connector.connect(
-        host='localhost',
-        user='your_username',
-        password='your_password',
-        database='SECDEVDB'
-    )
+    try:
+        conn = MySQLdb.connect(
+            host='rn000111667',       # e.g., 'localhost'
+            user='ktyagi19',       # MySQL username
+            password='Mysecurityengineer=99535', # MySQL password
+            database='SECDEVDB', # MySQL database name
+            port=3306                     # MySQL port (default is 3306)
+        )
+        return conn
+    except MySQLdb.Error as e:
+        print(f"Error connecting to MySQL: {e}")
+        # return None
 
+# Dashboard view to select an application
 def dashboard(request):
-    applications = ["CRM", "DMA", "DMM", "DMU", "DS3", "GALAXY", "MLA", "NHI", "OFF", "RDM", "RTS", "STR", "RPS"]
-    return render(request, 'dashboard.html', {'applications': applications})
+    apps = ['CRM', 'DMA', 'DMM', 'DMU', 'DS3', 'GALAXY', 'MLA', 'NHI', 'OFF', 'RDM', 'RTS', 'STR', 'RPS']
+    return render(request, 'dashboard.html', {'apps': apps})
 
+# View to display and edit entries for a specific app
 def edit_entries(request, app_name):
-    db = connect_db()
-    cursor = db.cursor()
-    cursor.execute(f"SELECT * FROM entries WHERE app_name = '{app_name}'")
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    # Fetch the data for the selected application
+    query = "SELECT * FROM sync_config WHERE app_name=%s"
+    cursor.execute(query, (app_name,))
     entries = cursor.fetchall()
-    db.close()
 
     if request.method == 'POST':
-        # Handle update logic here
-        pass
+        # Handle adding a new entry
+        secure_application_name = request.POST.get('Secure_Application_Name')
+        application_mui = request.POST.get('Application_MUI')
+        secure_environment = request.POST.get('Secure_Environment')
+        secure_role_name = request.POST.get('Secure_Role_Name')
+        member_identifier = request.POST.get('Member_Identifier')
+        member_identifier_type = request.POST.get('Member_Identifier_Type')
+        database_name = request.POST.get('Database_Name')
+        batch_role_or_support_team_member = request.POST.get('Batch_Role_or_Support_Team_Member')
+        restricted_to_ids = request.POST.get('Restricted_to_IDs')
+        viewpoint_role = request.POST.get('Viewpoint_Role')
+        role_complete = request.POST.get('Role_Complete')
 
-    return render(request, 'edit_entries.html', {'app_name': app_name, 'entries': entries})
+        insert_query = """
+            INSERT INTO sync_config (
+                app_name, Secure_Application_Name, Application_MUI, Secure_Environment, 
+                Secure_Role_Name, Member_Identifier, Member_Identifier_Type, Database_Name, 
+                Batch_Role_or_Support_Team_Member, Restricted_to_IDs, Viewpoint_Role, Role_Complete
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (
+            app_name, secure_application_name, application_mui, secure_environment, 
+            secure_role_name, member_identifier, member_identifier_type, database_name, 
+            batch_role_or_support_team_member, restricted_to_ids, viewpoint_role, role_complete
+        ))
+        conn.commit()
+        return redirect(f'/edit_entries/{app_name}/')
 
-def view_entries(request, app_name):
-    db = connect_db()
-    cursor = db.cursor()
-    cursor.execute(f"SELECT * FROM entries WHERE app_name = '{app_name}'")
-    entries = cursor.fetchall()
-    db.close()
-    return render(request, 'view_entries.html', {'app_name': app_name, 'entries': entries})
+    return render(request, 'edit_entries.html', {'entries': entries, 'app_name': app_name})
 
-def add_entry(request, app_name):
-    if request.method == 'POST':
-        # Get data from form and insert into MySQL
-        field1 = request.POST['field1']
-        field2 = request.POST['field2']
-        secure_env = request.POST['secure_env']
-        member_identifier_type = request.POST['member_identifier_type']
-        member_identifier = request.POST['member_identifier']
-        database_name = request.POST['database_name']
-        batch_role_support = request.POST['batch_role_support']
+# View to generate the CSV file
 
-        db = connect_db()
-        cursor = db.cursor()
-        cursor.execute(f"INSERT INTO entries (app_name, field1, field2, secure_env, member_identifier_type, member_identifier, database_name, batch_role_support) VALUES ('{app_name}', '{field1}', '{field2}', '{secure_env}', '{member_identifier_type}', '{member_identifier}', '{database_name}', '{batch_role_support}')")
-        db.commit()
-        db.close()
-        return redirect('edit_entries', app_name=app_name)
 
-    return render(request, 'add_entry.html', {'app_name': app_name})
-
-def download_csv(request, app_name):
-    db = connect_db()
-    cursor = db.cursor()
-    cursor.execute(f"SELECT * FROM entries WHERE app_name = '{app_name}'")
-    entries = cursor.fetchall()
-    db.close()
+def generate_csv(request,app_name):
+    # Create the HTTPRESPONSE object with the appropriate CSV header
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="{app_name}_entries.csv"'
+    response['Content Disposition'] = 'attachment;filename="asset_data.csv"'
+
 
     writer = csv.writer(response)
-    writer.writerow(['Field1', 'Field2', 'Secure Env', 'Member Identifier Type', 'Member Identifier', 'Database Name', 'Batch Role/Support Role'])
-    for entry in entries:
-        writer.writerow(entry)
 
+    writer.writerow(['Asset','Role','Command'])
+
+
+    # Retrieve data from the MYSQL table
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    #FETCH
+
+    try:
+        query = """
+            SELECT Secure_Application_Name, Application_MUI, Secure_Environment, Secure_Role_Name, 
+            Member_Identifier, Member_Identifier_Type, Database_Name,Batch_Role_or_Support_Team_Member, Restricted_to_IDs, Viewpoint_Role, Role_Complete
+            FROM sync_config WHERE app_name=%s
+            """
+        # cursor.execute("""
+        #     SELECT Secure_Application_Name, Application_MUI, Secure_Environment, Secure_Role_Name, 
+        #     Member_Identifier, Member_Identifier_Type, Database_Name,Batch_Role_or_Support_Team_Member, Restricted_to_IDs, Viewpoint_Role, Role_Complete
+        #     FROM sync_config WHERE app_name=%s
+        #     """)
+
+        
+        cursor.execute(query, (app_name,))
+        # rows = cursor.fetchall()
+        rows = cursor.fetchall()
+        print(f"Fetched rows: {len(rows)}")
+
+        for row in rows:
+            writer.writerow([row[0],f'Role={row[1]}',row[2]])
+
+
+    except MySQLdb.Error as e:
+        return HttpResponse(f"Database error: {e}",status=500)
+    
+    finally:
+        cursor.close()
+        conn.close()
     return response
-2. HTML Templates
-dashboard.html
-html
-Copy code
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
-        nav { background-color: #333; color: #fff; padding: 10px; }
-        nav h1 { margin: 0; }
-        nav ul { list-style: none; padding: 0; }
-        nav ul li { display: inline; margin-right: 20px; }
-        nav ul li a { color: #fff; text-decoration: none; }
-    </style>
-</head>
-<body>
-    <nav>
-        <h1>Dashboard</h1>
-        <ul>
-            {% for app in applications %}
-                <li><a href="{% url 'edit_entries' app %}">{{ app }}</a></li>
-                <li><a href="{% url 'view_entries' app %}">View {{ app }}</a></li>
-                <li><a href="{% url 'add_entry' app %}">Add {{ app }}</a></li>
-            {% endfor %}
-        </ul>
-    </nav>
-</body>
-</html>
-edit_entries.html
-html
-Copy code
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Entries for {{ app_name }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
-        h1 { color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-    </style>
-</head>
-<body>
-    <h1>Edit Entries for {{ app_name }}</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Field1</th>
-                <th>Field2</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in entries %}
-                <tr>
-                    <td>{{ entry[1] }}</td>
-                    <td>{{ entry[2] }}</td>
-                    <td>
-                        <form method="post" action="">
-                            {% csrf_token %}
-                            <button type="submit">Edit</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
-view_entries.html
-html
-Copy code
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Entries for {{ app_name }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
-        h1 { color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-    </style>
-</head>
-<body>
-    <h1>View Entries for {{ app_name }}</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Field1</th>
-                <th>Field2</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in entries %}
-                <tr>
-                    <td>{{ entry[1] }}</td>
-                    <td>{{ entry[2] }}</td>
-                    <td>
-                        <form method="post" action="">
-                            {% csrf_token %}
-                            <button type="submit">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <a href="{% url 'download_csv' app_name %}">Download CSV</a>
-</body>
-</html>
-add_entry.html
-html
-Copy code
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Entry for {{ app_name }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
-        h1 { color: #333; }
-        form { margin-top: 20px; }
-        label { display: block; margin: 5px 0; }
-        input, select { width: 100%; padding: 8px; margin: 5px 0; }
-    </style>
-</head>
-<body>
-    <h1>Add Entry for {{ app_name }}</h1>
-    <form method="post">
-        {% csrf_token %}
-        <label for="field1">Field 1:</label>
-        <input type="text" id="field1" name="field1" required>
-        
-        <label for="field2">Field 2:</label>
-        <input type="text" id="field2" name="field2" required>
-        
-        <label for="secure_env">Secure Environment:</label>
-        <select id="secure_env" name="secure_env" required>
-            <option value="Prod">Prod</option>
-            <option value="Test">Test</option>
-        </select>
-        
-        <label for="member_identifier_type">Member Identifier Type:</label>
-        <input type="text" id="member_identifier_type" name="member_identifier_type" required>
-        
-        <label for="member_identifier">Member Identifier:</label>
-        <input type="text" id="member_identifier" name="member_identifier">
-        
-        <label for="database_name">Database Name:</label>
-        <input type="text" id="database_name" name="database_name">
-        
-        <label for="batch_role_support">Batch Role/Support Role:</label>
-        <input type="text" id="batch_role_support" name="batch_role_support">
-
-        <button type="submit">Add Entry</button>
-    </form>
-</body>
-</html>
-3. urls.py
-Ensure you have the routes set up for all views.
-
-python
-Copy code
-from django.urls import path
-from .views import dashboard, edit_entries, view_entries, add_entry, download_csv
-
-urlpatterns = [
-    path('', dashboard, name='dashboard'),
-    path('edit_entries/<str:app_name>/', edit_entries, name='edit_entries'),
-    path('view_entries/<str:app_name>/', view_entries, name='view_entries'),
-    path('add_entry/<str:app_name>/', add_entry, name='add_entry'),
-    path('download_csv/<str:app_name>/', download_csv, name='download_csv'),
-]
-Explanation
-Inline CSS: Added to each HTML file to style the layout directly within the <style> tag.
-Download Functionality: Implemented in the download_csv view, allowing users to download the entries for a specific application in CSV format. The link to download the CSV is included in the view_entries.html file.
-Running the Project
-Make sure to migrate your database after any model changes and start your Django server. You should now be able to navigate through the dashboard, add entries, edit them, view all entries, and download the entries as a CSV file.
+    
 
 
 
 
+def view_entries(request, app_name):
+    conn = connect_db()
+    cursor = conn.cursor()
 
+    # Fetch all entries for the selected application
+    query = "SELECT * FROM sync_config WHERE app_name = %s"
+    cursor.execute(query, (app_name,))
+    entries = cursor.fetchall()
+
+    return render(request, 'view_entries.html', {
+        'entries': entries,
+        'app_name': app_name
+    })
+
+
+
+def delete_entry(request, entry_id, app_name):
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    # Delete the specific entry by ID
+    delete_query = "DELETE FROM sync_config WHERE id = %s"
+    cursor.execute(delete_query, (entry_id,))
+    conn.commit()
+
+    return redirect(f'/view_entries/{app_name}/')
 
