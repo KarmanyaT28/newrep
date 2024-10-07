@@ -1,69 +1,90 @@
-<div>
-            <button onclick="navigateToForm(1)">1</button>
-            <button onclick="navigateToForm(2)">2</button>
-            <button onclick="navigateToForm(3)">3</button>
-            <button onclick="navigateToForm(4)">4</button>
-            <button onclick="navigateToForm(5)">5</button>
-            <button onclick="navigateToForm(6)">6</button>
-            <button onclick="navigateToForm(7)">7</button>
-            <button onclick="navigateToForm(8)">8</button>
-            <button onclick="navigateToForm(9)">9</button>
+Thanks for sharing the HTML structure for navigating between forms using numbered buttons. I'll now integrate the logic to ensure the buttons navigate to the correct form pages. Here's how you can update this setup to work dynamically with your Django application and properly handle URL routing for each form.
+
+Updated HTML with URL routing and JavaScript:
+
+We will use the navigateToForm function to dynamically redirect to the form pages by their intakeformid.
+
+<div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-top: 20px;"> 
+    <div style="background-color: #f7f9fc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; width: 80%; text-align: center;"> 
+        <h2 style="color: #333; font-family: Arial, sans-serif; margin-bottom: 20px;">Role Intake Forms</h2> 
+        <div style="display: flex; justify-content: space-around; align-items: center;"> 
+            <div style="flex: 1; padding: 10px;"> 
+                <a href="javascript:void(0)" onclick="navigateToForm(1)">
+                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                        <span style="font-size: 18px; font-weight: bold;">1</span> 
+                    </div> 
+                    <p style="margin-top: 10px;">Application Form</p> 
+                </a>
+            </div> 
+            <div style="flex: 1; padding: 10px;"> 
+                <a href="javascript:void(0)" onclick="navigateToForm(2)">
+                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                        <span style="font-size: 18px; font-weight: bold;">2</span> 
+                    </div> 
+                    <p style="margin-top: 10px;">Secure Role Form</p> 
+                </a>
+            </div> 
+            <!-- Add remaining buttons similarly -->
+        </div> 
+    </div> 
 </div>
 
+<script>
+    function navigateToForm(formNumber) {
+        var intakeFormId = {{ intakeformid }}; // Ensure you pass this in your context
+        var url;
+
+        switch(formNumber) {
+            case 1:
+                url = "{% url 'application_form' intakeformid=intakeFormId %}";
+                break;
+            case 2:
+                url = "{% url 'application_details_form' intakeformid=intakeFormId %}";
+                break;
+            case 3:
+                url = "{% url 'secure_role_form' intakeformid=intakeFormId %}";
+                break;
+            case 4:
+                url = "{% url 'role_modification_log_form' intakeformid=intakeFormId %}";
+                break;
+            case 5:
+                url = "{% url 'data_req_form' intakeformid=intakeFormId %}";
+                break;
+            case 6:
+                url = "{% url 'group_req_form' intakeformid=intakeFormId %}";
+                break;
+            case 7:
+                url = "{% url 'host_req_form' intakeformid=intakeFormId %}";
+                break;
+            case 8:
+                url = "{% url 'preview_form' intakeformid=intakeFormId %}";
+                break;
+            case 9:
+                url = "{% url 'submit_form' intakeformid=intakeFormId %}";
+                break;
+            default:
+                url = "#";
+        }
+        
+        // Navigate to the new form
+        window.location.href = url;
+    }
+</script>
+
+Key Points:
+
+1. Dynamic URL Generation: The navigateToForm function generates the URL using Django's {% url %} tag and the intakeformid parameter. This ensures the correct form URL is generated for each button click.
 
 
-<div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-top: 20px;">
-            <div style="background-color: #f7f9fc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; width: 80%; text-align: center;">
-            <h2 style="color: #333; font-family: Arial, sans-serif; margin-bottom: 20px;">Role Intake Forms</h2>
-            <div style="display: flex; justify-content: space-around; align-items: center;">
-            <div style="flex: 1; padding: 10px;">
-            <a href="#form1" style="text-decoration: none; color: #333;">
-            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;">
-            <span style="font-size: 18px; font-weight: bold;">1</span>
-            </div>
-            <p style="margin-top: 10px;">Application Form</p>
-            </a>
-            </div>
-            <div style="flex: 1; padding: 10px;">
-            <a href="#form2" style="text-decoration: none; color: #333;">
-            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;">
-            <span style="font-size: 18px; font-weight: bold;">2</span>
-            </div>
-            <p style="margin-top: 10px;">Secure Role Form</p>
-            </a>
-            </div>
-            <div style="flex: 1; padding: 10px;">
-            <a href="#form3" style="text-decoration: none; color: #333;">
-            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;">
-            <span style="font-size: 18px; font-weight: bold;">3</span>
-            </div>
-            <p style="margin-top: 10px;">Role Modification Log Form</p>
-            </a>
-            </div>
-            <div style="flex: 1; padding: 10px;">
-            <a href="#form4" style="text-decoration: none; color: #333;">
-            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;">
-            <span style="font-size: 18px; font-weight: bold;">4</span>
-            </div>
-            <p style="margin-top: 10px;">Data Requirements Form</p>
-            </a>
-            </div>
-            <div style="flex: 1; padding: 10px;">
-            <a href="#form5" style="text-decoration: none; color: #333;">
-            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;">
-            <span style="font-size: 18px; font-weight: bold;">5</span>
-            </div>
-            <p style="margin-top: 10px;">Group Requirements Form</p>
-            </a>
-            </div>
-            <div style="flex: 1; padding: 10px;">
-            <a href="#form6" style="text-decoration: none; color: #333;">
-            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;">
-            <span style="font-size: 18px; font-weight: bold;">6</span>
-            </div>
-            <p style="margin-top: 10px;">Host Requirements Form</p>
-            </a>
-            </div>
-            </div>
-            </div>
-</div>
+2. Switch Statement: I added a switch statement to handle the different form numbers, where each case corresponds to a different form.
+
+
+3. intakeformid: Make sure that intakeformid is passed in the context of the template so that the form ID is dynamically included in the URLs.
+
+
+4. JavaScript window.location.href: This JavaScript function is used to redirect the user to the correct form page when they click one of the numbered buttons.
+
+
+
+Let me know if this setup works for your use case, or if you'd like to make further adjustments!
+
