@@ -1,124 +1,187 @@
-Here’s the complete code with all the buttons added:
+<div class="container">
+        <div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-top: 20px;"> 
+            <div style="background-color: {% if current_form == 1 %}#004080{% else %}#e9f5ff{% endif %}; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; width: 100%; text-align: center;"> 
+                <h2 style="color: #333; font-family: Arial, sans-serif; margin-bottom: 20px;">Role Intake Forms</h2> 
+                <div style="display: flex; justify-content: space-around; align-items: center;"> 
+                    <div style="flex: 1; padding: 10px;"> 
+                        <a href="javascript:void(0)" onclick="navigateToForm(1)">
+                            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                                <span style="font-size: 18px; font-weight: bold;">1</span> 
+                            </div> 
+                            <p style="margin-top: 10px;">Application Form</p> 
+                        </a>
+                    </div> 
+                    <div style="flex: 1; padding: 10px;"> 
+                        <a href="javascript:void(0)" onclick="navigateToForm(2)">
+                            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                                <span style="font-size: 18px; font-weight: bold;">2</span> 
+                            </div> 
+                            <p style="margin-top: 10px;">Secure Role Form</p> 
+                        </a>
+                    </div> 
+                    <div style="flex: 1; padding: 10px;"> 
+                        <a href="javascript:void(0)" onclick="navigateToForm(3)">
+                            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                                <span style="font-size: 18px; font-weight: bold;">3</span> 
+                            </div> 
+                            <p style="margin-top: 10px;">Role Modification Log Form</p> 
+                        </a>
+                    </div> 
+                    <div style="flex: 1; padding: 10px;"> 
+                        <a href="javascript:void(0)" onclick="navigateToForm(4)">
+                            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                                <span style="font-size: 18px; font-weight: bold;">4</span> 
+                            </div> 
+                            <p style="margin-top: 10px;">Role Access Form</p> 
+                        </a>
+                    </div> 
+                    <div style="flex: 1; padding: 10px;"> 
+                        <a href="javascript:void(0)" onclick="navigateToForm(5)">
+                            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                                <span style="font-size: 18px; font-weight: bold;">5</span> 
+                            </div> 
+                            <p style="margin-top: 10px;">Data Requirements Form</p> 
+                        </a>
+                    </div> 
+                    <div style="flex: 1; padding: 10px;"> 
+                        <a href="javascript:void(0)" onclick="navigateToForm(6)">
+                            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                                <span style="font-size: 18px; font-weight: bold;">6</span> 
+                            </div> 
+                            <p style="margin-top: 10px;">Host Requirements Form</p> 
+                        </a>
+                    </div> 
+                    <div style="flex: 1; padding: 10px;"> 
+                        <a href="javascript:void(0)" onclick="navigateToForm(7)">
+                            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                                <span style="font-size: 18px; font-weight: bold;">7</span> 
+                            </div> 
+                            <p style="margin-top: 10px;">Group Requirements</p> 
+                        </a>
+                    </div> 
+                    <div style="flex: 1; padding: 10px;"> 
+                        <a href="javascript:void(0)" onclick="navigateToForm(8)">
+                            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                                <span style="font-size: 18px; font-weight: bold;">8</span> 
+                            </div> 
+                            <p style="margin-top: 10px;">Other Requirements</p> 
+                        </a>
+                    </div> 
+                    <div style="flex: 1; padding: 10px;"> 
+                        <a href="javascript:void(0)" onclick="navigateToForm(9)">
+                            <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                                <span style="font-size: 18px; font-weight: bold;">9</span> 
+                            </div> 
+                            <p style="margin-top: 10px;">THIRD PARTY</p> 
+                        </a>
+                    </div> 
+                </div> 
+            </div> 
+        </div>
+        <h2>Third Party Form</h2>
 
-<div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-top: 20px;"> 
-    <div style="background-color: #f7f9fc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; width: 80%; text-align: center;"> 
-        <h2 style="color: #333; font-family: Arial, sans-serif; margin-bottom: 20px;">Role Intake Forms</h2> 
-        <div style="display: flex; justify-content: space-around; align-items: center;"> 
-            <div style="flex: 1; padding: 10px;"> 
-                <a href="javascript:void(0)" onclick="navigateToForm(1)">
-                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
-                        <span style="font-size: 18px; font-weight: bold;">1</span> 
-                    </div> 
-                    <p style="margin-top: 10px;">Application Form</p> 
-                </a>
-            </div> 
-            <div style="flex: 1; padding: 10px;"> 
-                <a href="javascript:void(0)" onclick="navigateToForm(2)">
-                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
-                        <span style="font-size: 18px; font-weight: bold;">2</span> 
-                    </div> 
-                    <p style="margin-top: 10px;">Secure Role Form</p> 
-                </a>
-            </div> 
-            <div style="flex: 1; padding: 10px;"> 
-                <a href="javascript:void(0)" onclick="navigateToForm(3)">
-                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
-                        <span style="font-size: 18px; font-weight: bold;">3</span> 
-                    </div> 
-                    <p style="margin-top: 10px;">Role Modification Log Form</p> 
-                </a>
-            </div> 
-            <div style="flex: 1; padding: 10px;"> 
-                <a href="javascript:void(0)" onclick="navigateToForm(4)">
-                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
-                        <span style="font-size: 18px; font-weight: bold;">4</span> 
-                    </div> 
-                    <p style="margin-top: 10px;">Data Requirements Form</p> 
-                </a>
-            </div> 
-            <div style="flex: 1; padding: 10px;"> 
-                <a href="javascript:void(0)" onclick="navigateToForm(5)">
-                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
-                        <span style="font-size: 18px; font-weight: bold;">5</span> 
-                    </div> 
-                    <p style="margin-top: 10px;">Group Requirements Form</p> 
-                </a>
-            </div> 
-            <div style="flex: 1; padding: 10px;"> 
-                <a href="javascript:void(0)" onclick="navigateToForm(6)">
-                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
-                        <span style="font-size: 18px; font-weight: bold;">6</span> 
-                    </div> 
-                    <p style="margin-top: 10px;">Host Requirements Form</p> 
-                </a>
-            </div> 
-            <div style="flex: 1; padding: 10px;"> 
-                <a href="javascript:void(0)" onclick="navigateToForm(7)">
-                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
-                        <span style="font-size: 18px; font-weight: bold;">7</span> 
-                    </div> 
-                    <p style="margin-top: 10px;">Preview Form</p> 
-                </a>
-            </div> 
-            <div style="flex: 1; padding: 10px;"> 
-                <a href="javascript:void(0)" onclick="navigateToForm(8)">
-                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
-                        <span style="font-size: 18px; font-weight: bold;">8</span> 
-                    </div> 
-                    <p style="margin-top: 10px;">Submit Form</p> 
-                </a>
-            </div> 
-        </div> 
-    </div> 
-</div>
+        <form method="POST" action="{% url 'third_party' intake_form_id %}">
+            {% csrf_token %}
+            
+            <label for="group_name">Group</label><br>
+            <input type="text" name="group_name" placeholder="group_name" required><br>
 
-<script>
-    function navigateToForm(formNumber) {
-        var intakeFormId = {{ intakeformid }}; // Ensure this is passed in context
-        var url;
+            <label for="group_type">Group Type</label><br>
+            <input type="text" name="group_type" placeholder="group_type" required><br>
 
-        switch(formNumber) {
-            case 1:
-                url = "{% url 'application_form' intakeformid=intakeFormId %}";
-                break;
-            case 2:
-                url = "{% url 'application_details_form' intakeformid=intakeFormId %}";
-                break;
-            case 3:
-                url = "{% url 'secure_role_form' intakeformid=intakeFormId %}";
-                break;
-            case 4:
-                url = "{% url 'role_modification_log_form' intakeformid=intakeFormId %}";
-                break;
-            case 5:
-                url = "{% url 'data_req_form' intakeformid=intakeFormId %}";
-                break;
-            case 6:
-                url = "{% url 'group_req_form' intakeformid=intakeFormId %}";
-                break;
-            case 7:
-                url = "{% url 'host_req_form' intakeformid=intakeFormId %}";
-                break;
-            case 8:
-                url = "{% url 'submit_form' intakeformid=intakeFormId %}";
-                break;
-            default:
-                url = "#";
-        }
+            <label for="description">Description</label><br>
+            <input type="text" name="description" placeholder="Description" required><br>
+
+            <label for="business_justification">Business Justification</label><br>
+            <input type="text" name="business_justification" placeholder="Business Justification" required><br><br>
+         
+            <button type="submit" name="save">Save</button><br><br>
+            <button type="submit" name="save_and_next">SAVE & NEXT</button><br><br>
         
-        // Navigate to the new form
-        window.location.href = url;
-    }
-</script>
+			 <!-- <button type="submit" name="save">Save</button>
+			 <button type="submit" name="save_and_next">Save & Next</button> -->
+         </form>
+         <!-- Display Existing Secure Role Entries -->
+         <h3>Existing Third Party Entries</h3>
+         <table>
+            <tr>
+                <th>GROUP</th>
+                <th>GROUP TYPE</th>
+                <th>DESCRIPTION</th>
+                <th>Business Justification</th>
+            </tr>
+            {% for entry in third_party_entries %}
+                <tr>
+                    <td>{{ entry.1 }}</td>
+                    <td>{{ entry.2 }}</td>
+                    <td>{{ entry.3 }}</td>
+                    <td>{{ entry.4 }}</td>
+                    
+                    
+                </tr>
+                {% endfor %}
+         </table>
 
-Key Features:
+         <button onclick="goToPreview()" class="btn btn-secondary">Preview</button><br><br>
 
-Buttons: Eight buttons corresponding to different forms, including Preview and Submit buttons.
+         <!-- <div>
+            <button onclick="navigateToForm(1)">1</button>
+            <button onclick="navigateToForm(2)">2</button>
+            <button onclick="navigateToForm(3)">3</button>
+            <button onclick="navigateToForm(4)">4</button>
+            <button onclick="navigateToForm(5)">5</button>
+            <button onclick="navigateToForm(6)">6</button>
+            <button onclick="navigateToForm(7)">7</button>
+            <button onclick="navigateToForm(8)">8</button>
+            <button onclick="navigateToForm(9)">9</button>
+        </div> -->
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+    </div>
 
-Dynamic URLs: Using Django’s {% url %} tag and intakeformid, the URLs for each form are dynamically generated.
+    <script>
+        function goToPreview() {
+            var intakeFormId = "{{ intake_form_id }}";
+            window.location.href = `/form/form/${intakeFormId}/preview/`;
+        }
 
-Flexbox: The layout is built using flexbox for equal distribution and alignment.
+        // Assuming `intake_form_id` is passed to the template context
+        var intakeFormId = "{{ intake_form_id }}";
+        function navigateToForm(formNumber) {
+            var url = '';
+            switch(formNumber) {
+                case 1:
+                    url = `/form/form/${intakeFormId}/application_details/`;
+                    break;
+                case 2:
+                    url = `/form/form/${intakeFormId}/secure_role/`;
+                    break;
+                case 3:
+                    url = `/form/form/${intakeFormId}/role_modification/`;
+                    break;
+                case 4:
+                    url = `/form/form/${intakeFormId}/role_access_form/`;
+                    break;
+                case 5:
+                    url = `/form/form/${intakeFormId}/data_req/`;
+                    break;
+                case 6:
+                    url = `/form/form/${intakeFormId}/host_req/`;
+                    break;
+                
+                case 7:
+                    url = `/form/form/${intakeFormId}/group_req/`;
+                    break;
 
+                case 8:
+                url = `/form/form/${intakeFormId}/other_req/`;
+                break;
 
-Let me know if you need further changes!
-
+                case 9:
+                url = `/form/form/${intakeFormId}/third_party/`;
+                break;
+            }
+            window.location.href = url;
+        }
+     </script>
+</body>
+</html>
