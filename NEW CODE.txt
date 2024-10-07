@@ -1,8 +1,4 @@
-Thanks for sharing the HTML structure for navigating between forms using numbered buttons. I'll now integrate the logic to ensure the buttons navigate to the correct form pages. Here's how you can update this setup to work dynamically with your Django application and properly handle URL routing for each form.
-
-Updated HTML with URL routing and JavaScript:
-
-We will use the navigateToForm function to dynamically redirect to the form pages by their intakeformid.
+Here’s the complete code with all the buttons added:
 
 <div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-top: 20px;"> 
     <div style="background-color: #f7f9fc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; width: 80%; text-align: center;"> 
@@ -24,14 +20,61 @@ We will use the navigateToForm function to dynamically redirect to the form page
                     <p style="margin-top: 10px;">Secure Role Form</p> 
                 </a>
             </div> 
-            <!-- Add remaining buttons similarly -->
+            <div style="flex: 1; padding: 10px;"> 
+                <a href="javascript:void(0)" onclick="navigateToForm(3)">
+                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                        <span style="font-size: 18px; font-weight: bold;">3</span> 
+                    </div> 
+                    <p style="margin-top: 10px;">Role Modification Log Form</p> 
+                </a>
+            </div> 
+            <div style="flex: 1; padding: 10px;"> 
+                <a href="javascript:void(0)" onclick="navigateToForm(4)">
+                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                        <span style="font-size: 18px; font-weight: bold;">4</span> 
+                    </div> 
+                    <p style="margin-top: 10px;">Data Requirements Form</p> 
+                </a>
+            </div> 
+            <div style="flex: 1; padding: 10px;"> 
+                <a href="javascript:void(0)" onclick="navigateToForm(5)">
+                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                        <span style="font-size: 18px; font-weight: bold;">5</span> 
+                    </div> 
+                    <p style="margin-top: 10px;">Group Requirements Form</p> 
+                </a>
+            </div> 
+            <div style="flex: 1; padding: 10px;"> 
+                <a href="javascript:void(0)" onclick="navigateToForm(6)">
+                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                        <span style="font-size: 18px; font-weight: bold;">6</span> 
+                    </div> 
+                    <p style="margin-top: 10px;">Host Requirements Form</p> 
+                </a>
+            </div> 
+            <div style="flex: 1; padding: 10px;"> 
+                <a href="javascript:void(0)" onclick="navigateToForm(7)">
+                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                        <span style="font-size: 18px; font-weight: bold;">7</span> 
+                    </div> 
+                    <p style="margin-top: 10px;">Preview Form</p> 
+                </a>
+            </div> 
+            <div style="flex: 1; padding: 10px;"> 
+                <a href="javascript:void(0)" onclick="navigateToForm(8)">
+                    <div style="background-color: #e9f5ff; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; margin: auto; transition: background-color 0.3s ease;"> 
+                        <span style="font-size: 18px; font-weight: bold;">8</span> 
+                    </div> 
+                    <p style="margin-top: 10px;">Submit Form</p> 
+                </a>
+            </div> 
         </div> 
     </div> 
 </div>
 
 <script>
     function navigateToForm(formNumber) {
-        var intakeFormId = {{ intakeformid }}; // Ensure you pass this in your context
+        var intakeFormId = {{ intakeformid }}; // Ensure this is passed in context
         var url;
 
         switch(formNumber) {
@@ -57,9 +100,6 @@ We will use the navigateToForm function to dynamically redirect to the form page
                 url = "{% url 'host_req_form' intakeformid=intakeFormId %}";
                 break;
             case 8:
-                url = "{% url 'preview_form' intakeformid=intakeFormId %}";
-                break;
-            case 9:
                 url = "{% url 'submit_form' intakeformid=intakeFormId %}";
                 break;
             default:
@@ -71,20 +111,14 @@ We will use the navigateToForm function to dynamically redirect to the form page
     }
 </script>
 
-Key Points:
+Key Features:
 
-1. Dynamic URL Generation: The navigateToForm function generates the URL using Django's {% url %} tag and the intakeformid parameter. This ensures the correct form URL is generated for each button click.
+Buttons: Eight buttons corresponding to different forms, including Preview and Submit buttons.
 
+Dynamic URLs: Using Django’s {% url %} tag and intakeformid, the URLs for each form are dynamically generated.
 
-2. Switch Statement: I added a switch statement to handle the different form numbers, where each case corresponds to a different form.
-
-
-3. intakeformid: Make sure that intakeformid is passed in the context of the template so that the form ID is dynamically included in the URLs.
+Flexbox: The layout is built using flexbox for equal distribution and alignment.
 
 
-4. JavaScript window.location.href: This JavaScript function is used to redirect the user to the correct form page when they click one of the numbered buttons.
-
-
-
-Let me know if this setup works for your use case, or if you'd like to make further adjustments!
+Let me know if you need further changes!
 
