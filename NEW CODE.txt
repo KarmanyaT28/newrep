@@ -1,6 +1,5 @@
-<div class="container">
-        <div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-top: 20px;"> 
-            <div style="background-color: {% if current_form == 1 %}#004080{% else %}#e9f5ff{% endif %}; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; width: 100%; text-align: center;"> 
+<div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-top: 20px;"> 
+            <div style="background-color: #f7f9fc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; width: 100%; text-align: center;"> 
                 <h2 style="color: #333; font-family: Arial, sans-serif; margin-bottom: 20px;">Role Intake Forms</h2> 
                 <div style="display: flex; justify-content: space-around; align-items: center;"> 
                     <div style="flex: 1; padding: 10px;"> 
@@ -78,74 +77,12 @@
                 </div> 
             </div> 
         </div>
-        <h2>Third Party Form</h2>
-
-        <form method="POST" action="{% url 'third_party' intake_form_id %}">
-            {% csrf_token %}
-            
-            <label for="group_name">Group</label><br>
-            <input type="text" name="group_name" placeholder="group_name" required><br>
-
-            <label for="group_type">Group Type</label><br>
-            <input type="text" name="group_type" placeholder="group_type" required><br>
-
-            <label for="description">Description</label><br>
-            <input type="text" name="description" placeholder="Description" required><br>
-
-            <label for="business_justification">Business Justification</label><br>
-            <input type="text" name="business_justification" placeholder="Business Justification" required><br><br>
-         
-            <button type="submit" name="save">Save</button><br><br>
-            <button type="submit" name="save_and_next">SAVE & NEXT</button><br><br>
-        
-			 <!-- <button type="submit" name="save">Save</button>
-			 <button type="submit" name="save_and_next">Save & Next</button> -->
-         </form>
-         <!-- Display Existing Secure Role Entries -->
-         <h3>Existing Third Party Entries</h3>
-         <table>
-            <tr>
-                <th>GROUP</th>
-                <th>GROUP TYPE</th>
-                <th>DESCRIPTION</th>
-                <th>Business Justification</th>
-            </tr>
-            {% for entry in third_party_entries %}
-                <tr>
-                    <td>{{ entry.1 }}</td>
-                    <td>{{ entry.2 }}</td>
-                    <td>{{ entry.3 }}</td>
-                    <td>{{ entry.4 }}</td>
-                    
-                    
-                </tr>
-                {% endfor %}
-         </table>
-
-         <button onclick="goToPreview()" class="btn btn-secondary">Preview</button><br><br>
-
-         <!-- <div>
-            <button onclick="navigateToForm(1)">1</button>
-            <button onclick="navigateToForm(2)">2</button>
-            <button onclick="navigateToForm(3)">3</button>
-            <button onclick="navigateToForm(4)">4</button>
-            <button onclick="navigateToForm(5)">5</button>
-            <button onclick="navigateToForm(6)">6</button>
-            <button onclick="navigateToForm(7)">7</button>
-            <button onclick="navigateToForm(8)">8</button>
-            <button onclick="navigateToForm(9)">9</button>
-        </div> -->
-        <a href="{% url 'dashboard' %}">Dashboard</a>
-    </div>
-
-    <script>
-        function goToPreview() {
-            var intakeFormId = "{{ intake_form_id }}";
-            window.location.href = `/form/form/${intakeFormId}/preview/`;
-        }
-
-        // Assuming `intake_form_id` is passed to the template context
-        var intakeFormId = "{{ intake_form_id }}";
+		
+		
+		
+		<script>
+		
+		var intakeFormId = "{{ intake_form_id }}";
         function navigateToForm(formNumber) {
             var url = '';
             switch(formNumber) {
@@ -182,6 +119,5 @@
             }
             window.location.href = url;
         }
-     </script>
-</body>
-</html>
+		
+		</script>
