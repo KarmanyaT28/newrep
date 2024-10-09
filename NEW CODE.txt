@@ -1,3 +1,66 @@
+sync_config_app Table
+This table will store the sync configuration details.
+
+sql
+Copy code
+CREATE TABLE sync_config_app (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    secureApp_Name VARCHAR(255) NOT NULL,
+    mui VARCHAR(255) NOT NULL,
+    app_type VARCHAR(255) NOT NULL,
+    mui_type VARCHAR(255),
+    env VARCHAR(255) NOT NULL,
+    role_Name VARCHAR(255) NOT NULL,
+    mbr_Identifier VARCHAR(255),
+    mbr_Identifier_Type VARCHAR(255),
+    db_name VARCHAR(255),
+    role_type VARCHAR(255),
+    restr_ID VARCHAR(255),
+    updt_user_id VARCHAR(255),
+    updt_date DATETIME,
+    created_date DATETIME,
+    create_user_id VARCHAR(255),
+    in_use_by VARCHAR(255) DEFAULT NULL
+);
+in_use_by field is added to track if a user is modifying the entry.
+id is the primary key (auto-incremented).
+2. Application_names Table
+This table will store application names associated with the mui identifier.
+
+sql
+Copy code
+CREATE TABLE Application_names (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    mui VARCHAR(255) NOT NULL,
+    app_name VARCHAR(255) NOT NULL
+);
+3. Environment Table
+This table will store environment names.
+
+sql
+Copy code
+CREATE TABLE Environment (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    env_name VARCHAR(255) NOT NULL
+);
+4. auth_user Table
+If you need a basic user table for login/registration, here’s an example. Alternatively, you could use Django’s default auth_user table.
+
+sql
+Copy code
+CREATE TABLE auth_user (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(150) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+Notes:
+Make sure to replace or adjust field lengths as needed.
+After creating the tables, ensure your MySQL user has the correct permissions to read and write data.
+If you're using Django's auth_user model for authentication, you don't need to create the auth_user table manually—it’s automatically created when you run migrations for the Django authentication system.
+Additional SQL Queries (for testing):
+
+
+
 To build this application with all the requested functionalities, I'll provide a complete structure with every file included, using SQL queries in views.py without using models.py, and using inline CSS for design. Here's how the project will be structured:
 
 1. Project Setup
